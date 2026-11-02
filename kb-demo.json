@@ -1,0 +1,1528 @@
+{
+  "versi": 1,
+  "domain": {
+    "nama": "Klasifikasi hewan Zoo",
+    "kesimpulan_default": "Konsultasi lebih lanjut",
+    "atribut": {
+      "hair": {
+        "tipe": "kategorikal",
+        "nilai": [
+          "0",
+          "1"
+        ]
+      },
+      "feathers": {
+        "tipe": "kategorikal",
+        "nilai": [
+          "0",
+          "1"
+        ]
+      },
+      "eggs": {
+        "tipe": "kategorikal",
+        "nilai": [
+          "0",
+          "1"
+        ]
+      },
+      "milk": {
+        "tipe": "kategorikal",
+        "nilai": [
+          "0",
+          "1"
+        ]
+      },
+      "airborne": {
+        "tipe": "kategorikal",
+        "nilai": [
+          "0",
+          "1"
+        ]
+      },
+      "aquatic": {
+        "tipe": "kategorikal",
+        "nilai": [
+          "0",
+          "1"
+        ]
+      },
+      "predator": {
+        "tipe": "kategorikal",
+        "nilai": [
+          "0",
+          "1"
+        ]
+      },
+      "toothed": {
+        "tipe": "kategorikal",
+        "nilai": [
+          "0",
+          "1"
+        ]
+      },
+      "backbone": {
+        "tipe": "kategorikal",
+        "nilai": [
+          "0",
+          "1"
+        ]
+      },
+      "breathes": {
+        "tipe": "kategorikal",
+        "nilai": [
+          "0",
+          "1"
+        ]
+      },
+      "venomous": {
+        "tipe": "kategorikal",
+        "nilai": [
+          "0",
+          "1"
+        ]
+      },
+      "fins": {
+        "tipe": "kategorikal",
+        "nilai": [
+          "0",
+          "1"
+        ]
+      },
+      "legs": {
+        "tipe": "numerik"
+      },
+      "tail": {
+        "tipe": "kategorikal",
+        "nilai": [
+          "0",
+          "1"
+        ]
+      },
+      "domestic": {
+        "tipe": "kategorikal",
+        "nilai": [
+          "0",
+          "1"
+        ]
+      },
+      "catsize": {
+        "tipe": "kategorikal",
+        "nilai": [
+          "0",
+          "1"
+        ]
+      }
+    }
+  },
+  "root": {
+    "id": 0,
+    "kondisi": null,
+    "kesimpulan": "Konsultasi lebih lanjut",
+    "kasus_kunci": null,
+    "true_child": {
+      "id": 1,
+      "kondisi": [
+        {
+          "atribut": "hair",
+          "operator": "=",
+          "nilai": "1"
+        },
+        {
+          "atribut": "feathers",
+          "operator": "=",
+          "nilai": "0"
+        },
+        {
+          "atribut": "eggs",
+          "operator": "=",
+          "nilai": "0"
+        },
+        {
+          "atribut": "milk",
+          "operator": "=",
+          "nilai": "1"
+        },
+        {
+          "atribut": "airborne",
+          "operator": "=",
+          "nilai": "0"
+        },
+        {
+          "atribut": "aquatic",
+          "operator": "=",
+          "nilai": "0"
+        },
+        {
+          "atribut": "predator",
+          "operator": "=",
+          "nilai": "1"
+        },
+        {
+          "atribut": "toothed",
+          "operator": "=",
+          "nilai": "1"
+        },
+        {
+          "atribut": "backbone",
+          "operator": "=",
+          "nilai": "1"
+        },
+        {
+          "atribut": "breathes",
+          "operator": "=",
+          "nilai": "1"
+        },
+        {
+          "atribut": "venomous",
+          "operator": "=",
+          "nilai": "0"
+        },
+        {
+          "atribut": "fins",
+          "operator": "=",
+          "nilai": "0"
+        },
+        {
+          "atribut": "legs",
+          "operator": "=",
+          "nilai": 4
+        },
+        {
+          "atribut": "tail",
+          "operator": "=",
+          "nilai": "0"
+        },
+        {
+          "atribut": "domestic",
+          "operator": "=",
+          "nilai": "0"
+        },
+        {
+          "atribut": "catsize",
+          "operator": "=",
+          "nilai": "1"
+        }
+      ],
+      "kesimpulan": "Mamalia",
+      "kasus_kunci": {
+        "hair": "1",
+        "feathers": "0",
+        "eggs": "0",
+        "milk": "1",
+        "airborne": "0",
+        "aquatic": "0",
+        "predator": "1",
+        "toothed": "1",
+        "backbone": "1",
+        "breathes": "1",
+        "venomous": "0",
+        "fins": "0",
+        "legs": 4,
+        "tail": "0",
+        "domestic": "0",
+        "catsize": "1"
+      },
+      "true_child": null,
+      "false_child": {
+        "id": 2,
+        "kondisi": [
+          {
+            "atribut": "hair",
+            "operator": "=",
+            "nilai": "0"
+          },
+          {
+            "atribut": "feathers",
+            "operator": "=",
+            "nilai": "0"
+          },
+          {
+            "atribut": "eggs",
+            "operator": "=",
+            "nilai": "1"
+          },
+          {
+            "atribut": "milk",
+            "operator": "=",
+            "nilai": "0"
+          },
+          {
+            "atribut": "airborne",
+            "operator": "=",
+            "nilai": "0"
+          },
+          {
+            "atribut": "aquatic",
+            "operator": "=",
+            "nilai": "1"
+          },
+          {
+            "atribut": "predator",
+            "operator": "=",
+            "nilai": "1"
+          },
+          {
+            "atribut": "toothed",
+            "operator": "=",
+            "nilai": "1"
+          },
+          {
+            "atribut": "backbone",
+            "operator": "=",
+            "nilai": "1"
+          },
+          {
+            "atribut": "breathes",
+            "operator": "=",
+            "nilai": "0"
+          },
+          {
+            "atribut": "venomous",
+            "operator": "=",
+            "nilai": "0"
+          },
+          {
+            "atribut": "fins",
+            "operator": "=",
+            "nilai": "1"
+          },
+          {
+            "atribut": "legs",
+            "operator": "=",
+            "nilai": 0
+          },
+          {
+            "atribut": "tail",
+            "operator": "=",
+            "nilai": "1"
+          },
+          {
+            "atribut": "domestic",
+            "operator": "=",
+            "nilai": "0"
+          },
+          {
+            "atribut": "catsize",
+            "operator": "=",
+            "nilai": "0"
+          }
+        ],
+        "kesimpulan": "Ikan",
+        "kasus_kunci": {
+          "hair": "0",
+          "feathers": "0",
+          "eggs": "1",
+          "milk": "0",
+          "airborne": "0",
+          "aquatic": "1",
+          "predator": "1",
+          "toothed": "1",
+          "backbone": "1",
+          "breathes": "0",
+          "venomous": "0",
+          "fins": "1",
+          "legs": 0,
+          "tail": "1",
+          "domestic": "0",
+          "catsize": "0"
+        },
+        "true_child": null,
+        "false_child": {
+          "id": 3,
+          "kondisi": [
+            {
+              "atribut": "hair",
+              "operator": "=",
+              "nilai": "0"
+            },
+            {
+              "atribut": "feathers",
+              "operator": "=",
+              "nilai": "1"
+            },
+            {
+              "atribut": "eggs",
+              "operator": "=",
+              "nilai": "1"
+            },
+            {
+              "atribut": "milk",
+              "operator": "=",
+              "nilai": "0"
+            },
+            {
+              "atribut": "airborne",
+              "operator": "=",
+              "nilai": "1"
+            },
+            {
+              "atribut": "aquatic",
+              "operator": "=",
+              "nilai": "0"
+            },
+            {
+              "atribut": "predator",
+              "operator": "=",
+              "nilai": "0"
+            },
+            {
+              "atribut": "toothed",
+              "operator": "=",
+              "nilai": "0"
+            },
+            {
+              "atribut": "backbone",
+              "operator": "=",
+              "nilai": "1"
+            },
+            {
+              "atribut": "breathes",
+              "operator": "=",
+              "nilai": "1"
+            },
+            {
+              "atribut": "venomous",
+              "operator": "=",
+              "nilai": "0"
+            },
+            {
+              "atribut": "fins",
+              "operator": "=",
+              "nilai": "0"
+            },
+            {
+              "atribut": "legs",
+              "operator": "=",
+              "nilai": 2
+            },
+            {
+              "atribut": "tail",
+              "operator": "=",
+              "nilai": "1"
+            },
+            {
+              "atribut": "domestic",
+              "operator": "=",
+              "nilai": "1"
+            },
+            {
+              "atribut": "catsize",
+              "operator": "=",
+              "nilai": "0"
+            }
+          ],
+          "kesimpulan": "Burung",
+          "kasus_kunci": {
+            "hair": "0",
+            "feathers": "1",
+            "eggs": "1",
+            "milk": "0",
+            "airborne": "1",
+            "aquatic": "0",
+            "predator": "0",
+            "toothed": "0",
+            "backbone": "1",
+            "breathes": "1",
+            "venomous": "0",
+            "fins": "0",
+            "legs": 2,
+            "tail": "1",
+            "domestic": "1",
+            "catsize": "0"
+          },
+          "true_child": null,
+          "false_child": {
+            "id": 4,
+            "kondisi": [
+              {
+                "atribut": "hair",
+                "operator": "=",
+                "nilai": "0"
+              },
+              {
+                "atribut": "feathers",
+                "operator": "=",
+                "nilai": "0"
+              },
+              {
+                "atribut": "eggs",
+                "operator": "=",
+                "nilai": "1"
+              },
+              {
+                "atribut": "milk",
+                "operator": "=",
+                "nilai": "0"
+              },
+              {
+                "atribut": "airborne",
+                "operator": "=",
+                "nilai": "0"
+              },
+              {
+                "atribut": "aquatic",
+                "operator": "=",
+                "nilai": "1"
+              },
+              {
+                "atribut": "predator",
+                "operator": "=",
+                "nilai": "1"
+              },
+              {
+                "atribut": "toothed",
+                "operator": "=",
+                "nilai": "1"
+              },
+              {
+                "atribut": "backbone",
+                "operator": "=",
+                "nilai": "1"
+              },
+              {
+                "atribut": "breathes",
+                "operator": "=",
+                "nilai": "1"
+              },
+              {
+                "atribut": "venomous",
+                "operator": "=",
+                "nilai": "0"
+              },
+              {
+                "atribut": "fins",
+                "operator": "=",
+                "nilai": "0"
+              },
+              {
+                "atribut": "legs",
+                "operator": "=",
+                "nilai": 4
+              },
+              {
+                "atribut": "tail",
+                "operator": "=",
+                "nilai": "0"
+              },
+              {
+                "atribut": "domestic",
+                "operator": "=",
+                "nilai": "0"
+              },
+              {
+                "atribut": "catsize",
+                "operator": "=",
+                "nilai": "0"
+              }
+            ],
+            "kesimpulan": "Amfibi",
+            "kasus_kunci": {
+              "hair": "0",
+              "feathers": "0",
+              "eggs": "1",
+              "milk": "0",
+              "airborne": "0",
+              "aquatic": "1",
+              "predator": "1",
+              "toothed": "1",
+              "backbone": "1",
+              "breathes": "1",
+              "venomous": "0",
+              "fins": "0",
+              "legs": 4,
+              "tail": "0",
+              "domestic": "0",
+              "catsize": "0"
+            },
+            "true_child": null,
+            "false_child": {
+              "id": 5,
+              "kondisi": [
+                {
+                  "atribut": "hair",
+                  "operator": "=",
+                  "nilai": "1"
+                },
+                {
+                  "atribut": "feathers",
+                  "operator": "=",
+                  "nilai": "0"
+                },
+                {
+                  "atribut": "eggs",
+                  "operator": "=",
+                  "nilai": "1"
+                },
+                {
+                  "atribut": "milk",
+                  "operator": "=",
+                  "nilai": "0"
+                },
+                {
+                  "atribut": "airborne",
+                  "operator": "=",
+                  "nilai": "1"
+                },
+                {
+                  "atribut": "aquatic",
+                  "operator": "=",
+                  "nilai": "0"
+                },
+                {
+                  "atribut": "predator",
+                  "operator": "=",
+                  "nilai": "0"
+                },
+                {
+                  "atribut": "toothed",
+                  "operator": "=",
+                  "nilai": "0"
+                },
+                {
+                  "atribut": "backbone",
+                  "operator": "=",
+                  "nilai": "0"
+                },
+                {
+                  "atribut": "breathes",
+                  "operator": "=",
+                  "nilai": "1"
+                },
+                {
+                  "atribut": "venomous",
+                  "operator": "=",
+                  "nilai": "1"
+                },
+                {
+                  "atribut": "fins",
+                  "operator": "=",
+                  "nilai": "0"
+                },
+                {
+                  "atribut": "legs",
+                  "operator": "=",
+                  "nilai": 6
+                },
+                {
+                  "atribut": "tail",
+                  "operator": "=",
+                  "nilai": "0"
+                },
+                {
+                  "atribut": "domestic",
+                  "operator": "=",
+                  "nilai": "1"
+                },
+                {
+                  "atribut": "catsize",
+                  "operator": "=",
+                  "nilai": "0"
+                }
+              ],
+              "kesimpulan": "Serangga",
+              "kasus_kunci": {
+                "hair": "1",
+                "feathers": "0",
+                "eggs": "1",
+                "milk": "0",
+                "airborne": "1",
+                "aquatic": "0",
+                "predator": "0",
+                "toothed": "0",
+                "backbone": "0",
+                "breathes": "1",
+                "venomous": "1",
+                "fins": "0",
+                "legs": 6,
+                "tail": "0",
+                "domestic": "1",
+                "catsize": "0"
+              },
+              "true_child": null,
+              "false_child": null
+            }
+          }
+        }
+      }
+    },
+    "false_child": null
+  },
+  "next_id": 6,
+  "riwayat": [
+    {
+      "waktu": "2026-10-31T12:54:05.710096+00:00",
+      "aksi": "rule_ditambahkan",
+      "kasus": {
+        "hair": "1",
+        "feathers": "0",
+        "eggs": "0",
+        "milk": "1",
+        "airborne": "0",
+        "aquatic": "0",
+        "predator": "1",
+        "toothed": "1",
+        "backbone": "1",
+        "breathes": "1",
+        "venomous": "0",
+        "fins": "0",
+        "legs": 4,
+        "tail": "0",
+        "domestic": "0",
+        "catsize": "1"
+      },
+      "hasil_sebelum": {
+        "kesimpulan": "Konsultasi lebih lanjut",
+        "last_firing_id": 0,
+        "jalur": [
+          {
+            "id": 0,
+            "terpenuhi": true,
+            "kesimpulan": "Konsultasi lebih lanjut"
+          }
+        ]
+      },
+      "hasil_sesudah": {
+        "kesimpulan": "Mamalia",
+        "last_firing_id": 1,
+        "jalur": [
+          {
+            "id": 0,
+            "terpenuhi": true,
+            "kesimpulan": "Konsultasi lebih lanjut"
+          },
+          {
+            "id": 1,
+            "terpenuhi": true,
+            "kesimpulan": "Mamalia"
+          }
+        ]
+      },
+      "rule": {
+        "id": 1,
+        "kondisi": [
+          {
+            "atribut": "hair",
+            "operator": "=",
+            "nilai": "1"
+          },
+          {
+            "atribut": "feathers",
+            "operator": "=",
+            "nilai": "0"
+          },
+          {
+            "atribut": "eggs",
+            "operator": "=",
+            "nilai": "0"
+          },
+          {
+            "atribut": "milk",
+            "operator": "=",
+            "nilai": "1"
+          },
+          {
+            "atribut": "airborne",
+            "operator": "=",
+            "nilai": "0"
+          },
+          {
+            "atribut": "aquatic",
+            "operator": "=",
+            "nilai": "0"
+          },
+          {
+            "atribut": "predator",
+            "operator": "=",
+            "nilai": "1"
+          },
+          {
+            "atribut": "toothed",
+            "operator": "=",
+            "nilai": "1"
+          },
+          {
+            "atribut": "backbone",
+            "operator": "=",
+            "nilai": "1"
+          },
+          {
+            "atribut": "breathes",
+            "operator": "=",
+            "nilai": "1"
+          },
+          {
+            "atribut": "venomous",
+            "operator": "=",
+            "nilai": "0"
+          },
+          {
+            "atribut": "fins",
+            "operator": "=",
+            "nilai": "0"
+          },
+          {
+            "atribut": "legs",
+            "operator": "=",
+            "nilai": 4
+          },
+          {
+            "atribut": "tail",
+            "operator": "=",
+            "nilai": "0"
+          },
+          {
+            "atribut": "domestic",
+            "operator": "=",
+            "nilai": "0"
+          },
+          {
+            "atribut": "catsize",
+            "operator": "=",
+            "nilai": "1"
+          }
+        ],
+        "kesimpulan": "Mamalia",
+        "kasus_kunci": {
+          "hair": "1",
+          "feathers": "0",
+          "eggs": "0",
+          "milk": "1",
+          "airborne": "0",
+          "aquatic": "0",
+          "predator": "1",
+          "toothed": "1",
+          "backbone": "1",
+          "breathes": "1",
+          "venomous": "0",
+          "fins": "0",
+          "legs": 4,
+          "tail": "0",
+          "domestic": "0",
+          "catsize": "1"
+        },
+        "true_child": null,
+        "false_child": null
+      }
+    },
+    {
+      "waktu": "2026-10-31T12:54:05.710425+00:00",
+      "aksi": "rule_ditambahkan",
+      "kasus": {
+        "hair": "0",
+        "feathers": "0",
+        "eggs": "1",
+        "milk": "0",
+        "airborne": "0",
+        "aquatic": "1",
+        "predator": "1",
+        "toothed": "1",
+        "backbone": "1",
+        "breathes": "0",
+        "venomous": "0",
+        "fins": "1",
+        "legs": 0,
+        "tail": "1",
+        "domestic": "0",
+        "catsize": "0"
+      },
+      "hasil_sebelum": {
+        "kesimpulan": "Konsultasi lebih lanjut",
+        "last_firing_id": 0,
+        "jalur": [
+          {
+            "id": 0,
+            "terpenuhi": true,
+            "kesimpulan": "Konsultasi lebih lanjut"
+          },
+          {
+            "id": 1,
+            "terpenuhi": false,
+            "kesimpulan": "Mamalia"
+          }
+        ]
+      },
+      "hasil_sesudah": {
+        "kesimpulan": "Ikan",
+        "last_firing_id": 2,
+        "jalur": [
+          {
+            "id": 0,
+            "terpenuhi": true,
+            "kesimpulan": "Konsultasi lebih lanjut"
+          },
+          {
+            "id": 1,
+            "terpenuhi": false,
+            "kesimpulan": "Mamalia"
+          },
+          {
+            "id": 2,
+            "terpenuhi": true,
+            "kesimpulan": "Ikan"
+          }
+        ]
+      },
+      "rule": {
+        "id": 2,
+        "kondisi": [
+          {
+            "atribut": "hair",
+            "operator": "=",
+            "nilai": "0"
+          },
+          {
+            "atribut": "feathers",
+            "operator": "=",
+            "nilai": "0"
+          },
+          {
+            "atribut": "eggs",
+            "operator": "=",
+            "nilai": "1"
+          },
+          {
+            "atribut": "milk",
+            "operator": "=",
+            "nilai": "0"
+          },
+          {
+            "atribut": "airborne",
+            "operator": "=",
+            "nilai": "0"
+          },
+          {
+            "atribut": "aquatic",
+            "operator": "=",
+            "nilai": "1"
+          },
+          {
+            "atribut": "predator",
+            "operator": "=",
+            "nilai": "1"
+          },
+          {
+            "atribut": "toothed",
+            "operator": "=",
+            "nilai": "1"
+          },
+          {
+            "atribut": "backbone",
+            "operator": "=",
+            "nilai": "1"
+          },
+          {
+            "atribut": "breathes",
+            "operator": "=",
+            "nilai": "0"
+          },
+          {
+            "atribut": "venomous",
+            "operator": "=",
+            "nilai": "0"
+          },
+          {
+            "atribut": "fins",
+            "operator": "=",
+            "nilai": "1"
+          },
+          {
+            "atribut": "legs",
+            "operator": "=",
+            "nilai": 0
+          },
+          {
+            "atribut": "tail",
+            "operator": "=",
+            "nilai": "1"
+          },
+          {
+            "atribut": "domestic",
+            "operator": "=",
+            "nilai": "0"
+          },
+          {
+            "atribut": "catsize",
+            "operator": "=",
+            "nilai": "0"
+          }
+        ],
+        "kesimpulan": "Ikan",
+        "kasus_kunci": {
+          "hair": "0",
+          "feathers": "0",
+          "eggs": "1",
+          "milk": "0",
+          "airborne": "0",
+          "aquatic": "1",
+          "predator": "1",
+          "toothed": "1",
+          "backbone": "1",
+          "breathes": "0",
+          "venomous": "0",
+          "fins": "1",
+          "legs": 0,
+          "tail": "1",
+          "domestic": "0",
+          "catsize": "0"
+        },
+        "true_child": null,
+        "false_child": null
+      }
+    },
+    {
+      "waktu": "2026-10-31T12:54:05.710925+00:00",
+      "aksi": "rule_ditambahkan",
+      "kasus": {
+        "hair": "0",
+        "feathers": "1",
+        "eggs": "1",
+        "milk": "0",
+        "airborne": "1",
+        "aquatic": "0",
+        "predator": "0",
+        "toothed": "0",
+        "backbone": "1",
+        "breathes": "1",
+        "venomous": "0",
+        "fins": "0",
+        "legs": 2,
+        "tail": "1",
+        "domestic": "1",
+        "catsize": "0"
+      },
+      "hasil_sebelum": {
+        "kesimpulan": "Konsultasi lebih lanjut",
+        "last_firing_id": 0,
+        "jalur": [
+          {
+            "id": 0,
+            "terpenuhi": true,
+            "kesimpulan": "Konsultasi lebih lanjut"
+          },
+          {
+            "id": 1,
+            "terpenuhi": false,
+            "kesimpulan": "Mamalia"
+          },
+          {
+            "id": 2,
+            "terpenuhi": false,
+            "kesimpulan": "Ikan"
+          }
+        ]
+      },
+      "hasil_sesudah": {
+        "kesimpulan": "Burung",
+        "last_firing_id": 3,
+        "jalur": [
+          {
+            "id": 0,
+            "terpenuhi": true,
+            "kesimpulan": "Konsultasi lebih lanjut"
+          },
+          {
+            "id": 1,
+            "terpenuhi": false,
+            "kesimpulan": "Mamalia"
+          },
+          {
+            "id": 2,
+            "terpenuhi": false,
+            "kesimpulan": "Ikan"
+          },
+          {
+            "id": 3,
+            "terpenuhi": true,
+            "kesimpulan": "Burung"
+          }
+        ]
+      },
+      "rule": {
+        "id": 3,
+        "kondisi": [
+          {
+            "atribut": "hair",
+            "operator": "=",
+            "nilai": "0"
+          },
+          {
+            "atribut": "feathers",
+            "operator": "=",
+            "nilai": "1"
+          },
+          {
+            "atribut": "eggs",
+            "operator": "=",
+            "nilai": "1"
+          },
+          {
+            "atribut": "milk",
+            "operator": "=",
+            "nilai": "0"
+          },
+          {
+            "atribut": "airborne",
+            "operator": "=",
+            "nilai": "1"
+          },
+          {
+            "atribut": "aquatic",
+            "operator": "=",
+            "nilai": "0"
+          },
+          {
+            "atribut": "predator",
+            "operator": "=",
+            "nilai": "0"
+          },
+          {
+            "atribut": "toothed",
+            "operator": "=",
+            "nilai": "0"
+          },
+          {
+            "atribut": "backbone",
+            "operator": "=",
+            "nilai": "1"
+          },
+          {
+            "atribut": "breathes",
+            "operator": "=",
+            "nilai": "1"
+          },
+          {
+            "atribut": "venomous",
+            "operator": "=",
+            "nilai": "0"
+          },
+          {
+            "atribut": "fins",
+            "operator": "=",
+            "nilai": "0"
+          },
+          {
+            "atribut": "legs",
+            "operator": "=",
+            "nilai": 2
+          },
+          {
+            "atribut": "tail",
+            "operator": "=",
+            "nilai": "1"
+          },
+          {
+            "atribut": "domestic",
+            "operator": "=",
+            "nilai": "1"
+          },
+          {
+            "atribut": "catsize",
+            "operator": "=",
+            "nilai": "0"
+          }
+        ],
+        "kesimpulan": "Burung",
+        "kasus_kunci": {
+          "hair": "0",
+          "feathers": "1",
+          "eggs": "1",
+          "milk": "0",
+          "airborne": "1",
+          "aquatic": "0",
+          "predator": "0",
+          "toothed": "0",
+          "backbone": "1",
+          "breathes": "1",
+          "venomous": "0",
+          "fins": "0",
+          "legs": 2,
+          "tail": "1",
+          "domestic": "1",
+          "catsize": "0"
+        },
+        "true_child": null,
+        "false_child": null
+      }
+    },
+    {
+      "waktu": "2026-10-31T12:54:05.711395+00:00",
+      "aksi": "rule_ditambahkan",
+      "kasus": {
+        "hair": "0",
+        "feathers": "0",
+        "eggs": "1",
+        "milk": "0",
+        "airborne": "0",
+        "aquatic": "1",
+        "predator": "1",
+        "toothed": "1",
+        "backbone": "1",
+        "breathes": "1",
+        "venomous": "0",
+        "fins": "0",
+        "legs": 4,
+        "tail": "0",
+        "domestic": "0",
+        "catsize": "0"
+      },
+      "hasil_sebelum": {
+        "kesimpulan": "Konsultasi lebih lanjut",
+        "last_firing_id": 0,
+        "jalur": [
+          {
+            "id": 0,
+            "terpenuhi": true,
+            "kesimpulan": "Konsultasi lebih lanjut"
+          },
+          {
+            "id": 1,
+            "terpenuhi": false,
+            "kesimpulan": "Mamalia"
+          },
+          {
+            "id": 2,
+            "terpenuhi": false,
+            "kesimpulan": "Ikan"
+          },
+          {
+            "id": 3,
+            "terpenuhi": false,
+            "kesimpulan": "Burung"
+          }
+        ]
+      },
+      "hasil_sesudah": {
+        "kesimpulan": "Amfibi",
+        "last_firing_id": 4,
+        "jalur": [
+          {
+            "id": 0,
+            "terpenuhi": true,
+            "kesimpulan": "Konsultasi lebih lanjut"
+          },
+          {
+            "id": 1,
+            "terpenuhi": false,
+            "kesimpulan": "Mamalia"
+          },
+          {
+            "id": 2,
+            "terpenuhi": false,
+            "kesimpulan": "Ikan"
+          },
+          {
+            "id": 3,
+            "terpenuhi": false,
+            "kesimpulan": "Burung"
+          },
+          {
+            "id": 4,
+            "terpenuhi": true,
+            "kesimpulan": "Amfibi"
+          }
+        ]
+      },
+      "rule": {
+        "id": 4,
+        "kondisi": [
+          {
+            "atribut": "hair",
+            "operator": "=",
+            "nilai": "0"
+          },
+          {
+            "atribut": "feathers",
+            "operator": "=",
+            "nilai": "0"
+          },
+          {
+            "atribut": "eggs",
+            "operator": "=",
+            "nilai": "1"
+          },
+          {
+            "atribut": "milk",
+            "operator": "=",
+            "nilai": "0"
+          },
+          {
+            "atribut": "airborne",
+            "operator": "=",
+            "nilai": "0"
+          },
+          {
+            "atribut": "aquatic",
+            "operator": "=",
+            "nilai": "1"
+          },
+          {
+            "atribut": "predator",
+            "operator": "=",
+            "nilai": "1"
+          },
+          {
+            "atribut": "toothed",
+            "operator": "=",
+            "nilai": "1"
+          },
+          {
+            "atribut": "backbone",
+            "operator": "=",
+            "nilai": "1"
+          },
+          {
+            "atribut": "breathes",
+            "operator": "=",
+            "nilai": "1"
+          },
+          {
+            "atribut": "venomous",
+            "operator": "=",
+            "nilai": "0"
+          },
+          {
+            "atribut": "fins",
+            "operator": "=",
+            "nilai": "0"
+          },
+          {
+            "atribut": "legs",
+            "operator": "=",
+            "nilai": 4
+          },
+          {
+            "atribut": "tail",
+            "operator": "=",
+            "nilai": "0"
+          },
+          {
+            "atribut": "domestic",
+            "operator": "=",
+            "nilai": "0"
+          },
+          {
+            "atribut": "catsize",
+            "operator": "=",
+            "nilai": "0"
+          }
+        ],
+        "kesimpulan": "Amfibi",
+        "kasus_kunci": {
+          "hair": "0",
+          "feathers": "0",
+          "eggs": "1",
+          "milk": "0",
+          "airborne": "0",
+          "aquatic": "1",
+          "predator": "1",
+          "toothed": "1",
+          "backbone": "1",
+          "breathes": "1",
+          "venomous": "0",
+          "fins": "0",
+          "legs": 4,
+          "tail": "0",
+          "domestic": "0",
+          "catsize": "0"
+        },
+        "true_child": null,
+        "false_child": null
+      }
+    },
+    {
+      "waktu": "2026-10-31T12:54:05.711946+00:00",
+      "aksi": "rule_ditambahkan",
+      "kasus": {
+        "hair": "1",
+        "feathers": "0",
+        "eggs": "1",
+        "milk": "0",
+        "airborne": "1",
+        "aquatic": "0",
+        "predator": "0",
+        "toothed": "0",
+        "backbone": "0",
+        "breathes": "1",
+        "venomous": "1",
+        "fins": "0",
+        "legs": 6,
+        "tail": "0",
+        "domestic": "1",
+        "catsize": "0"
+      },
+      "hasil_sebelum": {
+        "kesimpulan": "Konsultasi lebih lanjut",
+        "last_firing_id": 0,
+        "jalur": [
+          {
+            "id": 0,
+            "terpenuhi": true,
+            "kesimpulan": "Konsultasi lebih lanjut"
+          },
+          {
+            "id": 1,
+            "terpenuhi": false,
+            "kesimpulan": "Mamalia"
+          },
+          {
+            "id": 2,
+            "terpenuhi": false,
+            "kesimpulan": "Ikan"
+          },
+          {
+            "id": 3,
+            "terpenuhi": false,
+            "kesimpulan": "Burung"
+          },
+          {
+            "id": 4,
+            "terpenuhi": false,
+            "kesimpulan": "Amfibi"
+          }
+        ]
+      },
+      "hasil_sesudah": {
+        "kesimpulan": "Serangga",
+        "last_firing_id": 5,
+        "jalur": [
+          {
+            "id": 0,
+            "terpenuhi": true,
+            "kesimpulan": "Konsultasi lebih lanjut"
+          },
+          {
+            "id": 1,
+            "terpenuhi": false,
+            "kesimpulan": "Mamalia"
+          },
+          {
+            "id": 2,
+            "terpenuhi": false,
+            "kesimpulan": "Ikan"
+          },
+          {
+            "id": 3,
+            "terpenuhi": false,
+            "kesimpulan": "Burung"
+          },
+          {
+            "id": 4,
+            "terpenuhi": false,
+            "kesimpulan": "Amfibi"
+          },
+          {
+            "id": 5,
+            "terpenuhi": true,
+            "kesimpulan": "Serangga"
+          }
+        ]
+      },
+      "rule": {
+        "id": 5,
+        "kondisi": [
+          {
+            "atribut": "hair",
+            "operator": "=",
+            "nilai": "1"
+          },
+          {
+            "atribut": "feathers",
+            "operator": "=",
+            "nilai": "0"
+          },
+          {
+            "atribut": "eggs",
+            "operator": "=",
+            "nilai": "1"
+          },
+          {
+            "atribut": "milk",
+            "operator": "=",
+            "nilai": "0"
+          },
+          {
+            "atribut": "airborne",
+            "operator": "=",
+            "nilai": "1"
+          },
+          {
+            "atribut": "aquatic",
+            "operator": "=",
+            "nilai": "0"
+          },
+          {
+            "atribut": "predator",
+            "operator": "=",
+            "nilai": "0"
+          },
+          {
+            "atribut": "toothed",
+            "operator": "=",
+            "nilai": "0"
+          },
+          {
+            "atribut": "backbone",
+            "operator": "=",
+            "nilai": "0"
+          },
+          {
+            "atribut": "breathes",
+            "operator": "=",
+            "nilai": "1"
+          },
+          {
+            "atribut": "venomous",
+            "operator": "=",
+            "nilai": "1"
+          },
+          {
+            "atribut": "fins",
+            "operator": "=",
+            "nilai": "0"
+          },
+          {
+            "atribut": "legs",
+            "operator": "=",
+            "nilai": 6
+          },
+          {
+            "atribut": "tail",
+            "operator": "=",
+            "nilai": "0"
+          },
+          {
+            "atribut": "domestic",
+            "operator": "=",
+            "nilai": "1"
+          },
+          {
+            "atribut": "catsize",
+            "operator": "=",
+            "nilai": "0"
+          }
+        ],
+        "kesimpulan": "Serangga",
+        "kasus_kunci": {
+          "hair": "1",
+          "feathers": "0",
+          "eggs": "1",
+          "milk": "0",
+          "airborne": "1",
+          "aquatic": "0",
+          "predator": "0",
+          "toothed": "0",
+          "backbone": "0",
+          "breathes": "1",
+          "venomous": "1",
+          "fins": "0",
+          "legs": 6,
+          "tail": "0",
+          "domestic": "1",
+          "catsize": "0"
+        },
+        "true_child": null,
+        "false_child": null
+      }
+    }
+  ]
+}

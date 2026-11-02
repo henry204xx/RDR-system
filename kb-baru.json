@@ -1,0 +1,127 @@
+{
+  "versi": 1,
+  "domain": {
+    "nama": "Klasifikasi hewan Zoo",
+    "kesimpulan_default": "Konsultasi lebih lanjut",
+    "atribut": {
+      "hair": {
+        "tipe": "kategorikal",
+        "nilai": [
+          "0",
+          "1"
+        ]
+      },
+      "feathers": {
+        "tipe": "kategorikal",
+        "nilai": [
+          "0",
+          "1"
+        ]
+      },
+      "eggs": {
+        "tipe": "kategorikal",
+        "nilai": [
+          "0",
+          "1"
+        ]
+      },
+      "milk": {
+        "tipe": "kategorikal",
+        "nilai": [
+          "0",
+          "1"
+        ]
+      },
+      "airborne": {
+        "tipe": "kategorikal",
+        "nilai": [
+          "0",
+          "1"
+        ]
+      },
+      "aquatic": {
+        "tipe": "kategorikal",
+        "nilai": [
+          "0",
+          "1"
+        ]
+      },
+      "predator": {
+        "tipe": "kategorikal",
+        "nilai": [
+          "0",
+          "1"
+        ]
+      },
+      "toothed": {
+        "tipe": "kategorikal",
+        "nilai": [
+          "0",
+          "1"
+        ]
+      },
+      "backbone": {
+        "tipe": "kategorikal",
+        "nilai": [
+          "0",
+          "1"
+        ]
+      },
+      "breathes": {
+        "tipe": "kategorikal",
+        "nilai": [
+          "0",
+          "1"
+        ]
+      },
+      "venomous": {
+        "tipe": "kategorikal",
+        "nilai": [
+          "0",
+          "1"
+        ]
+      },
+      "fins": {
+        "tipe": "kategorikal",
+        "nilai": [
+          "0",
+          "1"
+        ]
+      },
+      "legs": {
+        "tipe": "numerik"
+      },
+      "tail": {
+        "tipe": "kategorikal",
+        "nilai": [
+          "0",
+          "1"
+        ]
+      },
+      "domestic": {
+        "tipe": "kategorikal",
+        "nilai": [
+          "0",
+          "1"
+        ]
+      },
+      "catsize": {
+        "tipe": "kategorikal",
+        "nilai": [
+          "0",
+          "1"
+        ]
+      }
+    }
+  },
+  "root": {
+    "id": 0,
+    "kondisi": null,
+    "kesimpulan": "Konsultasi lebih lanjut",
+    "kasus_kunci": null,
+    "true_child": null,
+    "false_child": null
+  },
+  "next_id": 1,
+  "riwayat": []
+}

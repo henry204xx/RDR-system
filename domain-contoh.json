@@ -1,0 +1,8 @@
+{
+  "nama": "Rekomendasi produk",
+  "kesimpulan_default": "Konsultasi lebih lanjut",
+  "atribut": {
+    "anggaran": {"tipe": "numerik"},
+    "kebutuhan": {"tipe": "kategorikal", "nilai": ["kerja", "belajar", "hiburan"]}
+  }
+}
