@@ -67,6 +67,111 @@ class DatasetTests(unittest.TestCase):
 
 
 class GUITests(unittest.TestCase):
+    def test_revise_conclusion_dialog(self):
+        import tkinter as tk
+        from gui import RDRApp, ReviseConclusionDialog
+        from rdr import accept, add_rule
+
+        try:
+            root = tk.Tk()
+        except tk.TclError as error:
+            self.skipTest(f"Tk tidak tersedia: {error}")
+        root.withdraw()
+        try:
+            app = RDRApp(root)
+            domain = {"nama": "uji", "kesimpulan_default": "default", "atribut": {
+                "warna": {"tipe": "kategorikal", "nilai": ["merah", "biru"]}}}
+            app.set_kb(new_kb(domain), None, dirty=False)
+            case = {"warna": "merah"}
+            add_rule(app.kb, case, "lama", [{"atribut": "warna", "operator": "=", "nilai": "merah"}])
+            app.select_rule(1)
+            app.revise_selected_conclusion()
+            dialog = next(window for window in root.winfo_children() if isinstance(window, ReviseConclusionDialog))
+            dialog.conclusion.set("baru")
+            with patch("gui.messagebox.showinfo"):
+                dialog.apply()
+            self.assertEqual(infer(app.kb, case)["kesimpulan"], "baru")
+            self.assertIn("baru", app.node_detail.get("1.0", "end"))
+            accept(app.kb, case)
+            dialog = ReviseConclusionDialog(app, app.kb["root"]["true_child"])
+            dialog.conclusion.set("bertentangan")
+            with patch("gui.messagebox.showerror") as error:
+                dialog.apply()
+                error.assert_called_once()
+            self.assertEqual(infer(app.kb, case)["kesimpulan"], "baru")
+            dialog.destroy()
+        finally:
+            root.destroy()
+
+    def test_edit_candidate_and_revise_saved_rule(self):
+        import tkinter as tk
+        from gui import CorrectionDialog, RDRApp, ReviseConditionDialog
+        from rdr import add_rule
+
+        try:
+            root = tk.Tk()
+        except tk.TclError as error:
+            self.skipTest(f"Tk tidak tersedia: {error}")
+        root.withdraw()
+        try:
+            app = RDRApp(root)
+            domain = {"nama": "uji", "kesimpulan_default": "default", "atribut": {
+                "cuaca": {"tipe": "kategorikal", "nilai": ["panas", "dingin"]}, "suhu": {"tipe": "numerik"}}}
+            app.set_kb(new_kb(domain), None, dirty=False)
+            add_rule(app.kb, {"cuaca": "panas", "suhu": 30}, "es", [{"atribut": "cuaca", "operator": "=", "nilai": "panas"}])
+            case = {"cuaca": "panas", "suhu": 36}
+            app.inputs["cuaca"].set("panas")
+            app.inputs["suhu"].set("36")
+            dialog = CorrectionDialog(app, case, infer(app.kb, case))
+            dialog.conclusion.set("super dingin")
+            dialog.listbox.selection_set(0)
+            dialog.edit_candidates()
+            self.assertEqual(dialog.editor.rows[0]["value"].get(), "33.0")
+            dialog.editor.rows[0]["value"].set("34")
+            with patch("gui.messagebox.showinfo"):
+                dialog.apply()
+            rule = app.kb["root"]["true_child"]["true_child"]
+            self.assertEqual(rule["kondisi"][0]["nilai"], 34)
+            app.select_rule(2)
+            dialog = ReviseConditionDialog(app, rule)
+            dialog.editor.rows[0]["value"].set("35")
+            with patch("gui.messagebox.showinfo"):
+                dialog.apply()
+            self.assertEqual(app.kb["root"]["true_child"]["true_child"]["kondisi"][0]["nilai"], 35)
+            self.assertIn('35.0', app.node_detail.get("1.0", "end"))
+            dialog = ReviseConditionDialog(app, app.kb["root"]["true_child"]["true_child"])
+            dialog.editor.rows[0]["value"].set("36")
+            with patch("gui.messagebox.showerror") as error:
+                dialog.apply()
+                error.assert_called_once()
+            self.assertEqual(app.kb["root"]["true_child"]["true_child"]["kondisi"][0]["nilai"], 35)
+            dialog.destroy()
+        finally:
+            root.destroy()
+
+    def test_condition_editor_conjunction_and_categorical_list(self):
+        import tkinter as tk
+        from gui import ConditionEditor
+
+        try:
+            root = tk.Tk()
+        except tk.TclError as error:
+            self.skipTest(f"Tk tidak tersedia: {error}")
+        root.withdraw()
+        try:
+            domain = {"nama": "uji", "kesimpulan_default": "default", "atribut": {
+                "warna": {"tipe": "kategorikal", "nilai": ["merah", "biru,muda"]}, "suhu": {"tipe": "numerik"}}}
+            editor = ConditionEditor(root, domain)
+            condition = [{"atribut": "warna", "operator": "in", "nilai": ["merah", "biru,muda"]},
+                         {"atribut": "suhu", "operator": ">", "nilai": 34}]
+            editor.set_condition(condition)
+            self.assertEqual(editor.get_condition(), condition)
+            editor.rows[1]["value"].set("bukan angka")
+            with self.assertRaises(RDRError):
+                editor.get_condition()
+        finally:
+            root.destroy()
+
     def test_gui_manual_domain_and_attribute(self):
         import tkinter as tk
         from gui import AttributeDialog, DomainDialog, RDRApp
@@ -128,6 +233,16 @@ class GUITests(unittest.TestCase):
             with patch("gui.messagebox.showinfo"):
                 attribute.apply()
             self.assertEqual(app.inputs["warna"].get(), "merah")
+            self.assertNotIn("fitur", app.kb["root"]["true_child"]["kasus_kunci"])
+            app.inputs["fitur"].set("ya")
+            case, result = app.current_result()
+            dialog = CorrectionDialog(app, case, result)
+            dialog.conclusion.set("khusus")
+            dialog.listbox.selection_set(0)
+            with patch("gui.messagebox.showinfo"):
+                dialog.apply()
+            self.assertEqual(infer(app.kb, {"warna": "merah"})["kesimpulan"], "contoh")
+            self.assertEqual(infer(app.kb, case)["kesimpulan"], "khusus")
             cornerstone = CornerstoneDialog(app)
             cornerstone.value.set("tidak")
             with patch("gui.messagebox.showinfo"):
@@ -135,11 +250,10 @@ class GUITests(unittest.TestCase):
             self.assertEqual(app.kb["root"]["true_child"]["kasus_kunci"]["fitur"], "tidak")
             app.inputs["warna"].set("")
             app.run_inference()
-            self.assertIn("Inferensi belum selesai", app.result.get("1.0", "end"))
-            with patch("gui.messagebox.showwarning") as warning:
+            self.assertIn("Perhatian: kondisi dengan atribut kosong", app.result.get("1.0", "end"))
+            with patch("gui.messagebox.showinfo"):
                 app.approve()
-                app.correct()
-                self.assertEqual(warning.call_count, 2)
+            self.assertEqual(app.kb["riwayat"][-1]["aksi"], "disetujui")
         finally:
             root.destroy()
 

@@ -24,8 +24,8 @@ def validate_domain(domain):
     if not isinstance(domain.get("kesimpulan_default"), str) or not domain["kesimpulan_default"].strip():
         raise RDRError("Kesimpulan default harus berupa teks yang tidak kosong.")
     attributes = domain.get("atribut")
-    if not isinstance(attributes, dict) or not attributes:
-        raise RDRError("Domain harus memiliki setidaknya satu atribut.")
+    if not isinstance(attributes, dict):
+        raise RDRError("Atribut domain harus berupa objek.")
     for name, spec in attributes.items():
         if not isinstance(name, str) or not name.strip() or not isinstance(spec, dict):
             raise RDRError("Nama dan definisi atribut tidak valid.")
@@ -78,16 +78,14 @@ def validate_condition(domain, condition):
 def matches(condition, case, domain):
     if condition is None:
         return True
-    unknown = False
     for clause in condition:
         value = case.get(clause["atribut"])
         if value is None:
-            unknown = True
-            continue
+            return False
         operations = NUMERIC_OPS if domain["atribut"][clause["atribut"]]["tipe"] == "numerik" else CATEGORICAL_OPS
         if not operations[clause["operator"]](value, clause["nilai"]):
             return False
-    return None if unknown else True
+    return True
 
 
 def new_rule(identifier, condition, conclusion, cornerstone):
@@ -108,17 +106,18 @@ def infer(kb, case):
     conclusion = node["kesimpulan"]
     last_rule = node
     path = []
+    missing = set()
     while node is not None:
         fired = matches(node["kondisi"], case, kb["domain"])
         path.append({"id": node["id"], "terpenuhi": fired, "kesimpulan": node["kesimpulan"]})
-        if fired is None:
-            missing = sorted({clause["atribut"] for clause in node["kondisi"] if case.get(clause["atribut"]) is None})
-            return {"kesimpulan": None, "kesimpulan_sementara": conclusion, "selesai": False,
-                    "atribut_diperlukan": missing, "last_firing_id": last_rule["id"], "jalur": path}
+        if node["kondisi"] is not None:
+            known = [clause for clause in node["kondisi"] if case.get(clause["atribut"]) is not None]
+            if matches(known, case, kb["domain"]):
+                missing.update(clause["atribut"] for clause in node["kondisi"] if case.get(clause["atribut"]) is None)
         if fired:
             conclusion, last_rule = node["kesimpulan"], node
         node = node["true_child" if fired else "false_child"]
-    return {"kesimpulan": conclusion, "selesai": True, "atribut_diperlukan": [],
+    return {"kesimpulan": conclusion, "selesai": True, "atribut_diperlukan": [], "atribut_tidak_diketahui": sorted(missing),
             "last_firing_id": last_rule["id"], "jalur": path}
 
 
@@ -141,9 +140,9 @@ def suggestions(domain, case, cornerstone):
     for name, spec in domain["atribut"].items():
         value = case.get(name)
         old = None if cornerstone is None else cornerstone.get(name)
-        if value is None or (cornerstone is not None and (old is None or value == old)):
+        if value is None or (cornerstone is not None and value == old):
             continue
-        if spec["tipe"] == "numerik" and cornerstone is not None:
+        if spec["tipe"] == "numerik" and old is not None:
             threshold = old / 2 + value / 2
             if not math.isfinite(threshold) or threshold == old or threshold == value:
                 threshold = old
@@ -181,7 +180,7 @@ def add_rule(kb, case, conclusion, condition):
         raise RDRError("Kondisi baru harus pasti terpenuhi oleh kasus baru; lengkapi nilai yang diperlukan.")
     last = next(rule for rule in iter_rules(kb["root"]) if rule["id"] == before["last_firing_id"])
     if last["kasus_kunci"] is not None and matches(condition, last["kasus_kunci"], kb["domain"]) is not False:
-        raise RDRError("Kondisi harus pasti tidak terpenuhi oleh kasus kunci rule terakhir; lengkapi nilai yang belum diketahui.")
+        raise RDRError("Kondisi tidak boleh terpenuhi oleh kasus kunci rule terakhir.")
 
     candidate = copy.deepcopy(kb)
     target = next(rule for rule in iter_rules(candidate["root"]) if rule["id"] == before["last_firing_id"])
@@ -214,6 +213,97 @@ def add_rule(kb, case, conclusion, condition):
     return after
 
 
+def revise_condition(kb, rule_id, condition):
+    validate_condition(kb["domain"], condition)
+    stack = [(kb["root"], None)]
+    target = parent = None
+    while stack:
+        node, context = stack.pop()
+        if node["id"] == rule_id:
+            target, parent = node, context
+            break
+        if node["false_child"] is not None:
+            stack.append((node["false_child"], context))
+        if node["true_child"] is not None:
+            stack.append((node["true_child"], node))
+    if target is None:
+        raise RDRError("Rule tidak ditemukan.")
+    if parent is None or target["kasus_kunci"] is None:
+        raise RDRError("Kondisi rule default tidak dapat direvisi.")
+    if not matches(condition, target["kasus_kunci"], kb["domain"]):
+        raise RDRError("Kondisi baru harus terpenuhi oleh kasus kunci rule ini.")
+    if parent["kasus_kunci"] is not None and matches(condition, parent["kasus_kunci"], kb["domain"]):
+        raise RDRError("Kondisi baru tidak boleh terpenuhi oleh kasus kunci rule yang dikoreksi.")
+
+    candidate = copy.deepcopy(kb)
+    revised = next(rule for rule in iter_rules(candidate["root"]) if rule["id"] == rule_id)
+    previous_condition = copy.deepcopy(revised["kondisi"])
+    revised["kondisi"] = copy.deepcopy(condition)
+    conflicts = []
+    for rule in iter_rules(kb["root"]):
+        if rule["kasus_kunci"] is None:
+            continue
+        before = infer(kb, rule["kasus_kunci"])
+        after = infer(candidate, rule["kasus_kunci"])
+        if (before["selesai"], before["kesimpulan"], before["last_firing_id"]) != (
+                after["selesai"], after["kesimpulan"], after["last_firing_id"]):
+            conflicts.append(rule["id"])
+    if conflicts:
+        raise RDRError(f"Revisi mengubah hasil atau rule terakhir kasus kunci {conflicts}; revisi ditolak.")
+    candidate["riwayat"].append({"waktu": timestamp(), "aksi": "kondisi_direvisi", "rule_id": rule_id,
+                                 "kondisi_sebelum": previous_condition, "kondisi_sesudah": copy.deepcopy(condition)})
+    kb.clear()
+    kb.update(candidate)
+
+
+def revise_conclusion(kb, rule_id, conclusion):
+    target = next((rule for rule in iter_rules(kb["root"]) if rule["id"] == rule_id), None)
+    if target is None:
+        raise RDRError("Rule tidak ditemukan.")
+    if not isinstance(conclusion, str) or not conclusion.strip():
+        raise RDRError("Kesimpulan baru tidak boleh kosong.")
+    conclusion = conclusion.strip()
+    if conclusion == target["kesimpulan"]:
+        raise RDRError("Kesimpulan baru sama dengan kesimpulan saat ini.")
+
+    candidate = copy.deepcopy(kb)
+    revised = next(rule for rule in iter_rules(candidate["root"]) if rule["id"] == rule_id)
+    previous_conclusion = revised["kesimpulan"]
+    revised["kesimpulan"] = conclusion
+    if rule_id == candidate["root"]["id"]:
+        candidate["domain"]["kesimpulan_default"] = conclusion
+    if target["kasus_kunci"] is not None:
+        result = infer(candidate, target["kasus_kunci"])
+        if not result["selesai"] or result["last_firing_id"] != rule_id or result["kesimpulan"] != conclusion:
+            raise RDRError("Kasus kunci rule ini tidak menghasilkan kesimpulan baru; revisi ditolak.")
+
+    conflicts = []
+    for rule in iter_rules(kb["root"]):
+        if rule["id"] == rule_id or rule["kasus_kunci"] is None:
+            continue
+        before = infer(kb, rule["kasus_kunci"])
+        after = infer(candidate, rule["kasus_kunci"])
+        if (before["selesai"], before["kesimpulan"]) != (after["selesai"], after["kesimpulan"]):
+            conflicts.append(rule["id"])
+    if conflicts:
+        raise RDRError(f"Revisi mengubah hasil kasus kunci rule lain {conflicts}; revisi ditolak.")
+    accepted_conflicts = []
+    for index, entry in enumerate(kb["riwayat"], start=1):
+        if entry.get("aksi") != "disetujui":
+            continue
+        before = infer(kb, entry["kasus"])
+        after = infer(candidate, entry["kasus"])
+        if (before["selesai"], before["kesimpulan"]) != (after["selesai"], after["kesimpulan"]):
+            accepted_conflicts.append(index)
+    if accepted_conflicts:
+        raise RDRError(f"Revisi mengubah hasil kasus yang disetujui pada riwayat {accepted_conflicts}; revisi ditolak.")
+
+    candidate["riwayat"].append({"waktu": timestamp(), "aksi": "kesimpulan_direvisi", "rule_id": rule_id,
+                                 "kesimpulan_sebelum": previous_conclusion, "kesimpulan_sesudah": conclusion})
+    kb.clear()
+    kb.update(candidate)
+
+
 def add_attribute(kb, name, spec, cornerstone_values=None):
     if not isinstance(name, str) or not name.strip() or name != name.strip():
         raise RDRError("Nama atribut harus berupa teks tidak kosong tanpa spasi di tepinya.")
@@ -231,7 +321,8 @@ def add_attribute(kb, name, spec, cornerstone_values=None):
     for rule in iter_rules(candidate["root"]):
         if rule["kasus_kunci"] is None:
             continue
-        rule["kasus_kunci"][name] = copy.deepcopy(values.get(rule["id"]))
+        if values.get(rule["id"]) is not None:
+            rule["kasus_kunci"][name] = copy.deepcopy(values[rule["id"]])
         validate_case(candidate["domain"], rule["kasus_kunci"])
         old_result = infer(kb, old_rules[rule["id"]]["kasus_kunci"])
         new_result = infer(candidate, rule["kasus_kunci"])

@@ -1,11 +1,13 @@
 """Antarmuka desktop untuk konsultasi dan akuisisi pengetahuan RDR."""
 
+import csv
+import io
 import json
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 
-from rdr import (RDRError, accept, add_attribute, add_rule, infer, iter_rules, load_kb, new_kb, save_kb,
-                 set_cornerstone_attribute, suggestions)
+from rdr import (RDRError, accept, add_attribute, add_rule, infer, iter_rules, load_kb, new_kb, revise_condition,
+                 revise_conclusion, save_kb, set_cornerstone_attribute, suggestions, validate_condition)
 
 
 class ScrollFrame(ttk.Frame):
@@ -46,7 +48,7 @@ class DomainDialog(tk.Toplevel):
         self.kind = tk.StringVar(value="kategorikal")
         self.values = tk.StringVar(value="tidak, ya")
         for row, (label, variable) in enumerate((("Nama domain", self.name), ("Kesimpulan default", self.default),
-                                                  ("Nama atribut pertama", self.attribute))):
+                                                  ("Nama atribut pertama (opsional)", self.attribute))):
             ttk.Label(form, text=label).grid(row=row, column=0, sticky="w", pady=5)
             ttk.Entry(form, textvariable=variable).grid(row=row, column=1, sticky="ew", padx=8)
         ttk.Label(form, text="Tipe atribut").grid(row=3, column=0, sticky="w", pady=5)
@@ -58,8 +60,9 @@ class DomainDialog(tk.Toplevel):
 
     def apply(self):
         try:
+            name = self.attribute.get().strip()
             domain = {"nama": self.name.get().strip(), "kesimpulan_default": self.default.get().strip(),
-                      "atribut": {self.attribute.get().strip(): attribute_spec(self.kind.get(), self.values.get())}}
+                      "atribut": {name: attribute_spec(self.kind.get(), self.values.get())} if name else {}}
             kb = new_kb(domain)
         except (ValueError, RDRError) as error:
             messagebox.showerror("Domain tidak valid", str(error), parent=self)
@@ -69,12 +72,92 @@ class DomainDialog(tk.Toplevel):
             self.destroy()
 
 
+class ConditionEditor(ttk.Frame):
+    def __init__(self, parent, domain):
+        super().__init__(parent)
+        self.domain = domain
+        self.rows = []
+        ttk.Label(self, text="Kondisi manual (gabungan AND): atribut, operator, nilai").pack(anchor="w")
+        rows_panel = ttk.Frame(self, height=105)
+        rows_panel.pack(fill="x")
+        rows_panel.pack_propagate(False)
+        scroll = ScrollFrame(rows_panel)
+        scroll.pack(fill="both", expand=True)
+        self.row_frame = scroll.content
+        ttk.Button(self, text="Tambah kondisi", command=self.add_row).pack(anchor="w", pady=3)
+        ttk.Label(self, text='Untuk operator in, pisahkan nilai dengan koma; apit nilai yang mengandung koma dengan tanda kutip.',
+                  wraplength=760).pack(anchor="w")
+
+    def add_row(self, clause=None):
+        row = ttk.Frame(self.row_frame)
+        row.pack(fill="x", pady=2)
+        attribute = tk.StringVar(value=clause["atribut"] if clause else "")
+        operation = tk.StringVar(value=clause["operator"] if clause else "")
+        value = tk.StringVar()
+        if clause:
+            if clause["operator"] == "in":
+                output = io.StringIO(newline="")
+                csv.writer(output, lineterminator="").writerow(clause["nilai"])
+                value.set(output.getvalue())
+            else:
+                value.set(str(clause["nilai"]))
+        attributes = ttk.Combobox(row, textvariable=attribute, values=list(self.domain["atribut"]), state="readonly", width=20)
+        attributes.pack(side="left", padx=(0, 5))
+        operators = ttk.Combobox(row, textvariable=operation, state="readonly", width=5)
+        operators.pack(side="left", padx=(0, 5))
+        ttk.Entry(row, textvariable=value, width=25).pack(side="left", fill="x", expand=True)
+        item = {"frame": row, "attribute": attribute, "operation": operation, "value": value}
+        self.rows.append(item)
+        ttk.Button(row, text="Hapus", command=lambda: self.remove_row(item)).pack(side="left", padx=5)
+
+        def update_operators(*_):
+            spec = self.domain["atribut"].get(attribute.get())
+            options = (["<", "<=", ">", ">=", "=", "!="] if spec and spec["tipe"] == "numerik"
+                       else ["=", "!=", "in"] if spec else [])
+            operators.configure(values=options)
+            if operation.get() not in options:
+                operation.set(options[0] if options else "")
+
+        attribute.trace_add("write", update_operators)
+        update_operators()
+
+    def remove_row(self, item):
+        self.rows.remove(item)
+        item["frame"].destroy()
+
+    def set_condition(self, condition):
+        for item in self.rows[:]:
+            self.remove_row(item)
+        for clause in condition:
+            self.add_row(clause)
+
+    def get_condition(self):
+        condition = []
+        for item in self.rows:
+            name, operation, raw = item["attribute"].get(), item["operation"].get(), item["value"].get()
+            spec = self.domain["atribut"].get(name)
+            if spec is None:
+                raise RDRError("Pilih atribut untuk setiap kondisi.")
+            if spec["tipe"] == "numerik":
+                value = parse_value(raw, spec)
+            elif operation == "in":
+                try:
+                    value = next(csv.reader([raw], skipinitialspace=True, strict=True))
+                except (csv.Error, StopIteration) as error:
+                    raise RDRError("Daftar nilai kategorikal tidak valid.") from error
+            else:
+                value = raw
+            condition.append({"atribut": name, "operator": operation, "nilai": value})
+        validate_condition(self.domain, condition)
+        return condition
+
+
 class CorrectionDialog(tk.Toplevel):
     def __init__(self, app, case, result):
         super().__init__(app.root)
         self.app, self.case = app, case
         self.title("Koreksi pakar")
-        self.geometry("820x650")
+        self.geometry("820x720")
         self.transient(app.root)
         self.grab_set()
         last = next(rule for rule in iter_rules(app.kb["root"]) if rule["id"] == result["last_firing_id"])
@@ -88,18 +171,19 @@ class CorrectionDialog(tk.Toplevel):
         if last["kasus_kunci"] is None:
             text = "Root default belum mempunyai kasus kunci. Pilih atribut yang bermakna."
         elif not self.options:
-            text = "Tidak ada perbedaan yang diketahui. Lengkapi kasus atau nilai kasus kunci, atau tambah atribut."
+            text = "Tidak ada kandidat pembeda. Lengkapi kasus atau tambah atribut."
         else:
-            text = "Pilih satu atau beberapa kandidat; semua pilihan digabung dengan AND."
+            text = "Pilih kandidat (AND). Nilai kunci kosong membedakan secara operasional, bukan bukti nilai lama."
         ttk.Label(self, text=text, padding=10, wraplength=760).pack(anchor="w")
-        self.listbox = tk.Listbox(self, selectmode="multiple", exportselection=False, height=10)
+        self.listbox = tk.Listbox(self, selectmode="multiple", exportselection=False, height=5)
         self.listbox.pack(fill="both", expand=True, padx=10)
         for item in self.options:
             self.listbox.insert("end", f"{item['atribut']}: baru={item['kasus_baru']!r}, kunci={item['kasus_kunci']!r} | {json.dumps(item['klausa'], ensure_ascii=False)}")
-        ttk.Label(self, text="Atau isi kondisi JSON manual (menggantikan pilihan di atas):", padding=10).pack(anchor="w")
-        self.manual = tk.Text(self, height=4, wrap="word")
-        self.manual.pack(fill="x", padx=10)
-        ttk.Label(self, text='Contoh: [{"atribut":"legs","operator":">=","nilai":4}]', padding=10).pack(anchor="w")
+        ttk.Button(self, text="Ubah kandidat terpilih", command=self.edit_candidates).pack(anchor="w", padx=10, pady=4)
+        self.editor = ConditionEditor(self, app.kb["domain"])
+        self.editor.pack(fill="x", padx=10)
+        ttk.Label(self, text="Jika kondisi manual diisi, kondisi tersebut menggantikan pilihan kandidat.",
+                  padding=10).pack(anchor="w")
         buttons = ttk.Frame(self, padding=10)
         buttons.pack(fill="x")
         ttk.Button(buttons, text="Batal", command=self.destroy).pack(side="right")
@@ -107,8 +191,8 @@ class CorrectionDialog(tk.Toplevel):
 
     def apply(self):
         try:
-            text = self.manual.get("1.0", "end").strip()
-            condition = json.loads(text) if text else [self.options[index]["klausa"] for index in self.listbox.curselection()]
+            condition = (self.editor.get_condition() if self.editor.rows else
+                         [self.options[index]["klausa"] for index in self.listbox.curselection()])
             result = add_rule(self.app.kb, self.case, self.conclusion.get().strip(), condition)
         except (RDRError, ValueError) as error:
             messagebox.showerror("Rule ditolak", str(error), parent=self)
@@ -118,6 +202,87 @@ class CorrectionDialog(tk.Toplevel):
         self.app.refresh_views()
         self.destroy()
         messagebox.showinfo("Rule ditambahkan", "Rule berhasil ditambahkan. Simpan KB untuk mempertahankan perubahan.", parent=self.app.root)
+
+    def edit_candidates(self):
+        selected = [self.options[index]["klausa"] for index in self.listbox.curselection()]
+        if not selected:
+            messagebox.showwarning("Pilih kandidat", "Pilih setidaknya satu kandidat terlebih dahulu.", parent=self)
+            return
+        self.editor.set_condition(selected)
+
+
+class ReviseConditionDialog(tk.Toplevel):
+    def __init__(self, app, rule):
+        super().__init__(app.root)
+        self.app, self.rule_id = app, rule["id"]
+        self.title(f"Revisi kondisi rule #{self.rule_id}")
+        self.geometry("820x450")
+        self.transient(app.root)
+        self.grab_set()
+        ttk.Label(self, text=f"Rule #{self.rule_id}: {rule['kesimpulan']}", padding=10).pack(anchor="w")
+        ttk.Label(self, text="Kasus kunci: " + json.dumps(rule["kasus_kunci"], ensure_ascii=False),
+                  padding=(10, 0), wraplength=760).pack(anchor="w")
+        self.editor = ConditionEditor(self, app.kb["domain"])
+        self.editor.pack(fill="x", padx=10, pady=10)
+        self.editor.set_condition(rule["kondisi"])
+        ttk.Label(self, text="Revisi diuji terhadap semua kasus kunci; hasil kasus lain dapat berubah.",
+                  padding=10, wraplength=760).pack(anchor="w")
+        buttons = ttk.Frame(self, padding=10)
+        buttons.pack(fill="x", side="bottom")
+        ttk.Button(buttons, text="Batal", command=self.destroy).pack(side="right")
+        ttk.Button(buttons, text="Simpan revisi", command=self.apply).pack(side="right", padx=5)
+
+    def apply(self):
+        try:
+            revise_condition(self.app.kb, self.rule_id, self.editor.get_condition())
+        except RDRError as error:
+            messagebox.showerror("Revisi ditolak", str(error), parent=self)
+            return
+        self.app.dirty = True
+        self.app.highlighted = []
+        self.app.set_text(self.app.result, "Rule berubah. Tekan Inferensi untuk memeriksa kasus kembali.")
+        self.app.refresh_views()
+        self.app.select_rule(self.rule_id)
+        self.destroy()
+        messagebox.showinfo("Kondisi direvisi", "Revisi dicatat. Simpan KB untuk mempertahankan perubahan.", parent=self.app.root)
+
+
+class ReviseConclusionDialog(tk.Toplevel):
+    def __init__(self, app, rule):
+        super().__init__(app.root)
+        self.app, self.rule_id = app, rule["id"]
+        self.title(f"Revisi kesimpulan rule #{self.rule_id}")
+        self.geometry("650x260")
+        self.transient(app.root)
+        self.grab_set()
+        ttk.Label(self, text=f"Kesimpulan saat ini: {rule['kesimpulan']}", padding=10, wraplength=600).pack(anchor="w")
+        form = ttk.Frame(self, padding=10)
+        form.pack(fill="x")
+        ttk.Label(form, text="Kesimpulan baru:").pack(side="left")
+        self.conclusion = tk.StringVar(value=rule["kesimpulan"])
+        ttk.Entry(form, textvariable=self.conclusion).pack(side="left", fill="x", expand=True, padx=8)
+        description = ("Kasus kunci rule ini akan memakai kesimpulan baru. " if rule["kasus_kunci"] is not None
+                       else "Kesimpulan default domain juga akan berubah. ")
+        ttk.Label(self, text=description + "Revisi ditolak jika mengubah hasil kasus kunci rule lain "
+                  "atau kasus yang pernah disetujui.", padding=10, wraplength=600).pack(anchor="w")
+        buttons = ttk.Frame(self, padding=10)
+        buttons.pack(fill="x", side="bottom")
+        ttk.Button(buttons, text="Batal", command=self.destroy).pack(side="right")
+        ttk.Button(buttons, text="Simpan revisi", command=self.apply).pack(side="right", padx=5)
+
+    def apply(self):
+        try:
+            revise_conclusion(self.app.kb, self.rule_id, self.conclusion.get())
+        except RDRError as error:
+            messagebox.showerror("Revisi ditolak", str(error), parent=self)
+            return
+        self.app.dirty = True
+        self.app.highlighted = []
+        self.app.set_text(self.app.result, "Rule berubah. Tekan Inferensi untuk memeriksa kasus kembali.")
+        self.app.refresh_views()
+        self.app.select_rule(self.rule_id)
+        self.destroy()
+        messagebox.showinfo("Kesimpulan direvisi", "Revisi dicatat. Simpan KB untuk mempertahankan perubahan.", parent=self.app.root)
 
 
 def parse_value(raw, spec):
@@ -172,7 +337,8 @@ class AttributeDialog(tk.Toplevel):
     def apply(self):
         try:
             spec = attribute_spec(self.kind.get(), self.values.get())
-            values = {rule_id: parse_value(variable.get(), spec) for rule_id, variable in self.cornerstones.items()}
+            values = {rule_id: parse_value(variable.get(), spec) for rule_id, variable in self.cornerstones.items()
+                      if variable.get().strip()}
             add_attribute(self.app.kb, self.name.get().strip(), spec, values)
         except (ValueError, RDRError) as error:
             messagebox.showerror("Atribut tidak ditambahkan", str(error), parent=self)
@@ -245,6 +411,7 @@ class RDRApp:
         self.root.minsize(760, 550)
         self.kb, self.path, self.dirty = None, None, False
         self.highlighted = []
+        self.selected_rule_id = None
         self.inputs = {}
         self.build_ui()
         self.root.protocol("WM_DELETE_WINDOW", self.close)
@@ -262,7 +429,7 @@ class RDRApp:
         self.tabs.pack(fill="both", expand=True, padx=8, pady=8)
         consult = ttk.Frame(self.tabs, padding=8)
         self.tabs.add(consult, text="Konsultasi")
-        ttk.Label(consult, text="Isi atribut yang diketahui. Kosong berarti tidak diketahui.").pack(anchor="w", pady=(0, 8))
+        ttk.Label(consult, text="Isi atribut yang diketahui. Kondisi dengan atribut kosong tidak terpenuhi.").pack(anchor="w", pady=(0, 8))
         split = ttk.Panedwindow(consult, orient="horizontal")
         split.pack(fill="both", expand=True, pady=8)
         form_panel = ttk.Frame(split, padding=4)
@@ -300,6 +467,8 @@ class RDRApp:
         canvas_frame.rowconfigure(0, weight=1)
         canvas_frame.columnconfigure(0, weight=1)
         ttk.Label(detail_frame, text="Detail node").pack(anchor="w")
+        ttk.Button(detail_frame, text="Revisi kondisi rule", command=self.revise_selected_condition).pack(anchor="w", pady=5)
+        ttk.Button(detail_frame, text="Revisi kesimpulan rule", command=self.revise_selected_conclusion).pack(anchor="w", pady=5)
         self.node_detail = tk.Text(detail_frame, width=35, wrap="word", state="disabled")
         self.node_detail.pack(fill="both", expand=True)
         history_panel = ttk.Frame(self.tabs, padding=8)
@@ -344,6 +513,7 @@ class RDRApp:
     def set_kb(self, kb, path, dirty):
         self.kb, self.path, self.dirty = kb, path, dirty
         self.highlighted = []
+        self.selected_rule_id = None
         self.build_form()
         self.set_text(self.result, "Masukkan atribut yang diketahui, lalu tekan Inferensi.")
         self.set_text(self.node_detail, "Klik node untuk melihat detail.")
@@ -412,6 +582,9 @@ class RDRApp:
         path = " -> ".join(f"#{step['id']} ({'unknown' if step['terpenuhi'] is None else 'true' if step['terpenuhi'] else 'false'})" for step in result["jalur"])
         if result["selesai"]:
             outcome = f"Kesimpulan: {result['kesimpulan']}"
+            if result.get("atribut_tidak_diketahui"):
+                outcome += ("\nPerhatian: kondisi dengan atribut kosong tidak terpenuhi: "
+                            + ", ".join(result["atribut_tidak_diketahui"]))
         else:
             outcome = (f"Inferensi belum selesai. Lengkapi: {', '.join(result['atribut_diperlukan'])}\n"
                        f"Kesimpulan sementara (belum final): {result['kesimpulan_sementara']}")
@@ -444,6 +617,38 @@ class RDRApp:
         self.status.set(f"Domain: {self.kb['domain']['nama']} | KB: {location}{' *' if self.dirty else ''}")
         self.set_text(self.history, json.dumps(self.kb["riwayat"], ensure_ascii=False, indent=2))
         self.render_tree()
+
+    def select_rule(self, rule_id):
+        rule = next((node for node in iter_rules(self.kb["root"]) if node["id"] == rule_id), None)
+        if rule is not None:
+            self.selected_rule_id = rule_id
+            self.set_text(self.node_detail, json.dumps({key: value for key, value in rule.items()
+                                                       if key not in ("true_child", "false_child")},
+                                                      ensure_ascii=False, indent=2))
+
+    def revise_selected_condition(self):
+        if not self.require_kb():
+            return
+        if self.selected_rule_id is None:
+            messagebox.showwarning("Pilih rule", "Klik node rule pada pohon terlebih dahulu.", parent=self.root)
+            return
+        rule = next((node for node in iter_rules(self.kb["root"]) if node["id"] == self.selected_rule_id), None)
+        if rule is None or rule["kondisi"] is None:
+            messagebox.showwarning("Rule tidak dapat direvisi", "Pilih rule selain root default.", parent=self.root)
+            return
+        ReviseConditionDialog(self, rule)
+
+    def revise_selected_conclusion(self):
+        if not self.require_kb():
+            return
+        if self.selected_rule_id is None:
+            messagebox.showwarning("Pilih rule", "Klik node rule pada pohon terlebih dahulu.", parent=self.root)
+            return
+        rule = next((node for node in iter_rules(self.kb["root"]) if node["id"] == self.selected_rule_id), None)
+        if rule is None:
+            messagebox.showwarning("Rule tidak ditemukan", "Pilih node rule pada pohon.", parent=self.root)
+            return
+        ReviseConclusionDialog(self, rule)
 
     def render_tree(self):
         self.canvas.delete("all")
@@ -484,8 +689,7 @@ class RDRApp:
             condition = "TRUE" if rule["kondisi"] is None else f"{len(rule['kondisi'])} klausa"
             self.canvas.create_text(x, y, text=f"#{rule['id']}  |  {condition}\n{conclusion}", width=185,
                                     justify="center", tags=tag, font=("Segoe UI", 10))
-            self.canvas.tag_bind(tag, "<Button-1>", lambda event, selected=rule: self.set_text(
-                self.node_detail, json.dumps({key: value for key, value in selected.items() if key not in ("true_child", "false_child")}, ensure_ascii=False, indent=2)))
+            self.canvas.tag_bind(tag, "<Button-1>", lambda event, selected_id=rule["id"]: self.select_rule(selected_id))
         max_depth = max(depth for _, depth in ordered)
         self.canvas.configure(scrollregion=(0, 0, max(240, len(ordered) * 225 + 20), max(130, (max_depth + 1) * 125 + 20)))
 

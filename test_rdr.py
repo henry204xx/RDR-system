@@ -6,7 +6,7 @@ from pathlib import Path
 
 from main import zoo_domain, zoo_rows
 from rdr import (RDRError, accept, add_attribute, add_rule, infer, iter_rules, load_kb, matches, new_kb,
-                 save_kb, set_cornerstone_attribute, suggestions)
+                 revise_condition, revise_conclusion, save_kb, set_cornerstone_attribute, suggestions)
 
 
 class RDRTests(unittest.TestCase):
@@ -52,37 +52,36 @@ class RDRTests(unittest.TestCase):
             self.assertTrue(matches([self.clause("warna", operation, value)], self.red, self.domain))
         self.assertFalse(matches([self.clause("warna", "=", "merah"), self.clause("ukuran", "<", 3)], self.red, self.domain))
 
-    def test_unknown_inference_and_false_conjunction(self):
+    def test_missing_values_do_not_match_and_are_reported(self):
         clauses = [self.clause("warna", "=", "merah"), self.clause("ukuran", ">", 5)]
-        self.assertIsNone(matches(clauses, {"warna": "merah"}, self.domain))
+        self.assertIs(matches(clauses, {"warna": "merah"}, self.domain), False)
         self.assertIs(matches(clauses, {"warna": "biru"}, self.domain), False)
+        self.assertIs(matches([self.clause("warna", "!=", "biru")], {}, self.domain), False)
+        self.assertIs(matches([self.clause("ukuran", "!=", 5)], {"ukuran": None}, self.domain), False)
         add_rule(self.kb, self.red, "merah besar", clauses)
         result = infer(self.kb, {"warna": "merah"})
-        self.assertFalse(result["selesai"])
-        self.assertIsNone(result["kesimpulan"])
-        self.assertEqual(result["atribut_diperlukan"], ["ukuran"])
+        self.assertTrue(result["selesai"])
+        self.assertEqual(result["kesimpulan"], "default")
+        self.assertEqual(result["atribut_tidak_diketahui"], ["ukuran"])
         self.assertEqual(infer(self.kb, {"warna": "biru"})["kesimpulan"], "default")
-        snapshot = copy.deepcopy(self.kb)
-        with self.assertRaises(RDRError):
-            accept(self.kb, {"warna": "merah"})
-        with self.assertRaises(RDRError):
-            add_rule(self.kb, {"warna": "merah"}, "lain", [self.clause("warna", "=", "merah")])
-        self.assertEqual(snapshot, self.kb)
+        accept(self.kb, {"warna": "merah"})
 
     def test_add_attribute_and_complete_cornerstone(self):
         add_rule(self.kb, self.red, "merah", [self.clause("warna", "=", "merah")])
         original_history = copy.deepcopy(self.kb["riwayat"])
         add_attribute(self.kb, "fitur", {"tipe": "kategorikal", "nilai": ["ya", "tidak"]})
-        self.assertIsNone(self.kb["root"]["true_child"]["kasus_kunci"]["fitur"])
+        self.assertEqual(self.kb["root"]["true_child"]["kasus_kunci"], self.red)
         self.assertEqual(self.kb["riwayat"][:len(original_history)], original_history)
         new_case = {"warna": "merah", "fitur": "ya"}
         condition = [self.clause("fitur", "=", "ya")]
-        with self.assertRaises(RDRError):
-            add_rule(self.kb, new_case, "baru", condition)
-        set_cornerstone_attribute(self.kb, 1, "fitur", "tidak")
+        self.assertIn(condition[0], [item["klausa"] for item in suggestions(self.kb["domain"], new_case, self.red)])
         add_rule(self.kb, new_case, "baru", condition)
-        self.assertEqual(infer(self.kb, self.red | {"fitur": "tidak"})["kesimpulan"], "merah")
+        self.assertEqual(self.kb["root"]["true_child"]["kasus_kunci"], self.red)
+        self.assertEqual(infer(self.kb, self.red)["kesimpulan"], "merah")
         self.assertEqual(infer(self.kb, new_case)["kesimpulan"], "baru")
+        with self.assertRaises(RDRError):
+            set_cornerstone_attribute(self.kb, 1, "fitur", "ya")
+        set_cornerstone_attribute(self.kb, 1, "fitur", "tidak")
         with self.assertRaises(RDRError):
             set_cornerstone_attribute(self.kb, 1, "fitur", "ya")
         with tempfile.NamedTemporaryFile(dir=Path.cwd(), delete=False) as file:
@@ -92,6 +91,101 @@ class RDRTests(unittest.TestCase):
             self.assertEqual(load_kb(path), self.kb)
         finally:
             path.unlink(missing_ok=True)
+
+    def test_new_numeric_attribute_and_existing_unknown_values(self):
+        old_case = {"warna": "merah", "ukuran": None}
+        add_rule(self.kb, old_case, "merah", [self.clause("warna", "=", "merah")])
+        add_attribute(self.kb, "berat", {"tipe": "numerik"})
+        case = {"warna": "merah", "berat": 12}
+        suggestion = next(item["klausa"] for item in suggestions(self.kb["domain"], case, old_case)
+                          if item["atribut"] == "berat")
+        self.assertEqual(suggestion, self.clause("berat", "=", 12))
+        add_rule(self.kb, case, "berat", [suggestion])
+        self.assertEqual(infer(self.kb, old_case)["kesimpulan"], "merah")
+        self.assertEqual(infer(self.kb, case)["kesimpulan"], "berat")
+        self.assertEqual(self.kb["root"]["true_child"]["kasus_kunci"], old_case)
+
+    def test_root_only_domain(self):
+        kb = new_kb({"nama": "kosong", "kesimpulan_default": "default", "atribut": {}})
+        self.assertEqual(infer(kb, {})["kesimpulan"], "default")
+        add_attribute(kb, "fitur", {"tipe": "numerik"})
+        add_rule(kb, {"fitur": 1}, "baru", [self.clause("fitur", "=", 1)])
+        self.assertEqual(infer(kb, {})["kesimpulan"], "default")
+
+    def test_revise_condition_preserves_cornerstones_and_history(self):
+        add_rule(self.kb, self.red, "merah", [self.clause("warna", "=", "merah")])
+        hot = {"warna": "merah", "ukuran": 20}
+        small = {"warna": "merah", "ukuran": 6}
+        add_rule(self.kb, hot, "besar", [self.clause("ukuran", ">", 15)])
+        add_rule(self.kb, small, "kecil", [self.clause("ukuran", "<", 8)])
+        revise_condition(self.kb, 2, [self.clause("ukuran", ">", 17)])
+        rule = next(rule for rule in iter_rules(self.kb["root"]) if rule["id"] == 2)
+        self.assertEqual(rule["kondisi"], [self.clause("ukuran", ">", 17)])
+        self.assertEqual(infer(self.kb, hot)["kesimpulan"], "besar")
+        self.assertEqual(infer(self.kb, self.red)["kesimpulan"], "merah")
+        self.assertEqual(infer(self.kb, small)["kesimpulan"], "kecil")
+        self.assertEqual(self.kb["riwayat"][-1]["aksi"], "kondisi_direvisi")
+        self.assertEqual(self.kb["riwayat"][-1]["kondisi_sebelum"], [self.clause("ukuran", ">", 15)])
+        snapshot = copy.deepcopy(self.kb)
+        for rule_id, condition in [(0, [self.clause("ukuran", ">", 5)]),
+                                   (99, [self.clause("ukuran", ">", 5)]),
+                                   (2, [self.clause("ukuran", ">", 21)]),
+                                   (2, [self.clause("ukuran", ">", 5)]),
+                                   (2, [self.clause("ukuran", "!=", 10)])]:
+            with self.subTest(rule_id=rule_id, condition=condition), self.assertRaises(RDRError):
+                revise_condition(self.kb, rule_id, condition)
+            self.assertEqual(self.kb, snapshot)
+        with tempfile.NamedTemporaryFile(dir=Path.cwd(), delete=False) as file:
+            path = Path(file.name)
+        try:
+            save_kb(self.kb, path)
+            self.assertEqual(load_kb(path), self.kb)
+        finally:
+            path.unlink(missing_ok=True)
+    def test_revise_conclusion_and_reject_approved_conflict(self):
+        add_rule(self.kb, self.red, "merah", [self.clause("warna", "=", "merah")])
+        add_rule(self.kb, self.blue, "biru", [self.clause("warna", "=", "biru")])
+        old_history = copy.deepcopy(self.kb["riwayat"])
+        revise_conclusion(self.kb, 1, "merah baru")
+        self.assertEqual(infer(self.kb, self.red)["kesimpulan"], "merah baru")
+        self.assertEqual(infer(self.kb, self.blue)["kesimpulan"], "biru")
+        self.assertEqual(self.kb["riwayat"][:-1], old_history)
+        self.assertEqual(self.kb["riwayat"][-1]["kesimpulan_sebelum"], "merah")
+        self.assertEqual(self.kb["riwayat"][-1]["kesimpulan_sesudah"], "merah baru")
+        self.assertEqual(self.kb["riwayat"][-1]["aksi"], "kesimpulan_direvisi")
+        accept(self.kb, {"warna": "merah", "ukuran": 12})
+        snapshot = copy.deepcopy(self.kb)
+        for rule_id, conclusion in [(1, "lain"), (1, "  "), (1, "merah baru"), (999, "lain")]:
+            with self.subTest(rule_id=rule_id, conclusion=conclusion), self.assertRaises(RDRError):
+                revise_conclusion(self.kb, rule_id, conclusion)
+            self.assertEqual(self.kb, snapshot)
+        with tempfile.NamedTemporaryFile(dir=Path.cwd(), delete=False) as file:
+            path = Path(file.name)
+        try:
+            save_kb(self.kb, path)
+            self.assertEqual(load_kb(path), self.kb)
+        finally:
+            path.unlink(missing_ok=True)
+
+    def test_revise_default_and_preserve_approved_cases(self):
+        revise_conclusion(self.kb, 0, "default baru")
+        self.assertEqual(self.kb["domain"]["kesimpulan_default"], "default baru")
+        self.assertEqual(infer(self.kb, {})["kesimpulan"], "default baru")
+        add_rule(self.kb, self.red, "merah", [self.clause("warna", "=", "merah")])
+        accept(self.kb, self.blue)
+        snapshot = copy.deepcopy(self.kb)
+        with self.assertRaises(RDRError):
+            revise_conclusion(self.kb, 0, "lain")
+        self.assertEqual(self.kb, snapshot)
+
+    def test_revise_conclusion_rejects_other_cornerstone_conflict(self):
+        add_rule(self.kb, self.red, "merah", [self.clause("warna", "=", "merah")])
+        add_rule(self.kb, self.blue, "biru", [self.clause("warna", "=", "biru")])
+        self.kb["root"]["true_child"]["false_child"]["kasus_kunci"] = copy.deepcopy(self.red)
+        snapshot = copy.deepcopy(self.kb)
+        with self.assertRaisesRegex(RDRError, "kasus kunci rule lain"):
+            revise_conclusion(self.kb, 1, "lain")
+        self.assertEqual(self.kb, snapshot)
 
     def test_suggestions_distinguish_cornerstone(self):
         for item in suggestions(self.domain, self.blue, self.red):

@@ -33,6 +33,8 @@ def zoo_rows():
 def show_result(result):
     if result["selesai"]:
         print(f"Kesimpulan: {result['kesimpulan']}")
+        if result.get("atribut_tidak_diketahui"):
+            print("Perhatian: kondisi dengan atribut kosong tidak terpenuhi: " + ", ".join(result["atribut_tidak_diketahui"]))
     else:
         print(f"Inferensi belum selesai. Lengkapi: {', '.join(result['atribut_diperlukan'])}")
         print(f"Kesimpulan sementara (belum final): {result['kesimpulan_sementara']}")
@@ -93,6 +95,8 @@ def consult(kb, path, case):
     options = suggestions(kb["domain"], case, last["kasus_kunci"])
     if last["kasus_kunci"] is None:
         print("Rule default belum memiliki kasus kunci; semua atribut dapat menjadi kandidat.")
+    elif any(item["kasus_kunci"] is None for item in options):
+        print("Nilai kunci kosong membedakan secara operasional; ini bukan bukti nilai lama.")
     if not options:
         print("Tidak ada perbedaan atribut dengan kasus kunci; rule tidak dapat ditambahkan.")
         return
