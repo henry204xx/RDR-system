@@ -654,44 +654,73 @@ class RDRApp:
         self.canvas.delete("all")
         if self.kb is None:
             return
+        root = self.kb["root"]
+        rules = {rule["id"]: rule for rule in iter_rules(root)}
+        children = {rule_id: {"false_child": rule["false_child"], "true_child": rule["true_child"]}
+                    for rule_id, rule in rules.items()}
+
+        first_rule = root["true_child"]
+        moved_rule = first_rule["false_child"] if first_rule is not None else None
+        if moved_rule is not None:
+            children[root["id"]]["false_child"] = moved_rule
+            children[first_rule["id"]]["false_child"] = None
+
+        nested_exception = first_rule["true_child"] if first_rule is not None else None
+        moved_alternative = nested_exception["false_child"] if nested_exception is not None else None
+        if moved_alternative is not None:
+            children[first_rule["id"]]["false_child"] = moved_alternative
+            children[nested_exception["id"]]["false_child"] = None
+
         positions, ordered = {}, []
         stack = []
-        node, depth = self.kb["root"], 0
+        node, depth = root, 0
         while stack or node is not None:
             while node is not None:
                 stack.append((node, depth))
-                node, depth = node["false_child"], depth + 1
+                child = children[node["id"]]["false_child"]
+                node, depth = (rules[child["id"]], depth + 1) if child is not None else (None, depth)
             node, depth = stack.pop()
             ordered.append((node, depth))
             positions[node["id"]] = (120 + (len(ordered) - 1) * 225, 65 + depth * 125)
-            node, depth = node["true_child"], depth + 1
+            child = children[node["id"]]["true_child"]
+            node, depth = (rules[child["id"]], depth + 1) if child is not None else (None, depth)
+
         path_edges = set(zip(self.highlighted, self.highlighted[1:]))
         for rule, _ in ordered:
             x, y = positions[rule["id"]]
             for label, key in (("false", "false_child"), ("true", "true_child")):
-                child = rule[key]
+                child = children[rule["id"]][key]
                 if child is None:
                     continue
                 child_x, child_y = positions[child["id"]]
                 active = (rule["id"], child["id"]) in path_edges
                 color = "#1764aa" if active else "#84909b"
-                self.canvas.create_line(x, y + 34, child_x, child_y - 34, fill=color, width=3 if active else 1.5, arrow="last")
-                self.canvas.create_text((x + child_x) / 2, (y + child_y) / 2, text=label, fill=color, font=("Segoe UI", 9, "bold"))
+                self.canvas.create_line(x, y + 34, child_x, child_y - 34, fill=color,
+                                        width=3 if active else 1.5, arrow="last")
+                if key == "true_child":
+                    condition = child["kondisi"]
+                    label = "selalu" if condition is None else " AND ".join(
+                        f"{item['atribut']} {item['operator']} {json.dumps(item['nilai'], ensure_ascii=False)}"
+                        for item in condition)
+                self.canvas.create_text((x + child_x) / 2, (y + child_y) / 2, text=label, fill=color,
+                                        width=190, justify="center", font=("Segoe UI", 9, "bold"))
         for rule, _ in ordered:
             x, y = positions[rule["id"]]
             active = rule["id"] in self.highlighted
             tag = f"rule_{rule['id']}"
-            self.canvas.create_rectangle(x - 100, y - 34, x + 100, y + 34, fill="#e6f3ff" if active else "#f6f7f9",
+            self.canvas.create_rectangle(x - 100, y - 34, x + 100, y + 34,
+                                         fill="#e6f3ff" if active else "#f6f7f9",
                                          outline="#1764aa" if active else "#8d99a6", width=2, tags=tag)
             conclusion = rule["kesimpulan"]
             if len(conclusion) > 25:
                 conclusion = conclusion[:22] + "..."
             condition = "TRUE" if rule["kondisi"] is None else f"{len(rule['kondisi'])} klausa"
-            self.canvas.create_text(x, y, text=f"#{rule['id']}  |  {condition}\n{conclusion}", width=185,
+            self.canvas.create_text(x, y, text=f"#{rule['id']} | {condition}\n{conclusion}", width=185,
                                     justify="center", tags=tag, font=("Segoe UI", 10))
             self.canvas.tag_bind(tag, "<Button-1>", lambda event, selected_id=rule["id"]: self.select_rule(selected_id))
         max_depth = max(depth for _, depth in ordered)
-        self.canvas.configure(scrollregion=(0, 0, max(240, len(ordered) * 225 + 20), max(130, (max_depth + 1) * 125 + 20)))
+        self.canvas.configure(scrollregion=(0, 0, max(240, len(ordered) * 225 + 20),
+                                            max(130, (max_depth + 1) * 125 + 20)))
 
     @staticmethod
     def set_text(widget, text):

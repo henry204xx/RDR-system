@@ -1,0 +1,806 @@
+{
+  "versi": 1,
+  "domain": {
+    "nama": "Minuman",
+    "kesimpulan_default": "Air putih",
+    "atribut": {
+      "cuaca": {
+        "tipe": "kategorikal",
+        "nilai": [
+          "panas",
+          "dingin"
+        ]
+      },
+      "suhu": {
+        "tipe": "numerik"
+      },
+      "gula": {
+        "tipe": "kategorikal",
+        "nilai": [
+          "tidak",
+          "ya"
+        ]
+      }
+    }
+  },
+  "root": {
+    "id": 0,
+    "kondisi": null,
+    "kesimpulan": "Air putih",
+    "kasus_kunci": null,
+    "true_child": {
+      "id": 1,
+      "kondisi": [
+        {
+          "atribut": "cuaca",
+          "operator": "=",
+          "nilai": "panas"
+        }
+      ],
+      "kesimpulan": "Es teh",
+      "kasus_kunci": {
+        "cuaca": "panas",
+        "suhu": 30.0
+      },
+      "true_child": {
+        "id": 3,
+        "kondisi": [
+          {
+            "atribut": "suhu",
+            "operator": ">",
+            "nilai": 33.0
+          }
+        ],
+        "kesimpulan": "Es teh ekstra dingin",
+        "kasus_kunci": {
+          "cuaca": "panas",
+          "suhu": 36.0
+        },
+        "true_child": null,
+        "false_child": {
+          "id": 4,
+          "kondisi": [
+            {
+              "atribut": "suhu",
+              "operator": "<",
+              "nilai": 27.0
+            }
+          ],
+          "kesimpulan": "Es teh ringan",
+          "kasus_kunci": {
+            "cuaca": "panas",
+            "suhu": 24.0
+          },
+          "true_child": null,
+          "false_child": {
+            "id": 7,
+            "kondisi": [
+              {
+                "atribut": "suhu",
+                "operator": ">",
+                "nilai": 31.0
+              }
+            ],
+            "kesimpulan": "Es teh manis dingin",
+            "kasus_kunci": {
+              "cuaca": "panas",
+              "suhu": 32.0,
+              "gula": "ya"
+            },
+            "true_child": null,
+            "false_child": null
+          }
+        }
+      },
+      "false_child": {
+        "id": 2,
+        "kondisi": [
+          {
+            "atribut": "cuaca",
+            "operator": "=",
+            "nilai": "dingin"
+          }
+        ],
+        "kesimpulan": "Teh hangat",
+        "kasus_kunci": {
+          "cuaca": "dingin",
+          "suhu": 20.0
+        },
+        "true_child": {
+          "id": 5,
+          "kondisi": [
+            {
+              "atribut": "suhu",
+              "operator": "<",
+              "nilai": 14.0
+            }
+          ],
+          "kesimpulan": "Teh hangat pekat",
+          "kasus_kunci": {
+            "cuaca": "dingin",
+            "suhu": 8.0
+          },
+          "true_child": {
+            "id": 6,
+            "kondisi": [
+              {
+                "atribut": "gula",
+                "operator": "=",
+                "nilai": "ya"
+              }
+            ],
+            "kesimpulan": "Es teh manis",
+            "kasus_kunci": {
+              "cuaca": "dingin",
+              "suhu": 8.0,
+              "gula": "ya"
+            },
+            "true_child": null,
+            "false_child": null
+          },
+          "false_child": null
+        },
+        "false_child": null
+      }
+    },
+    "false_child": null
+  },
+  "next_id": 8,
+  "riwayat": [
+    {
+      "waktu": "2026-11-03T12:21:41.624198+00:00",
+      "aksi": "atribut_ditambahkan",
+      "atribut": "suhu",
+      "definisi": {
+        "tipe": "numerik"
+      },
+      "nilai_kasus_kunci": []
+    },
+    {
+      "waktu": "2026-11-03T12:22:49.960690+00:00",
+      "aksi": "rule_ditambahkan",
+      "kasus": {
+        "cuaca": "panas",
+        "suhu": 30.0
+      },
+      "hasil_sebelum": {
+        "kesimpulan": "Air putih",
+        "selesai": true,
+        "atribut_diperlukan": [],
+        "atribut_tidak_diketahui": [],
+        "last_firing_id": 0,
+        "jalur": [
+          {
+            "id": 0,
+            "terpenuhi": true,
+            "kesimpulan": "Air putih"
+          }
+        ]
+      },
+      "hasil_sesudah": {
+        "kesimpulan": "Es teh",
+        "selesai": true,
+        "atribut_diperlukan": [],
+        "atribut_tidak_diketahui": [],
+        "last_firing_id": 1,
+        "jalur": [
+          {
+            "id": 0,
+            "terpenuhi": true,
+            "kesimpulan": "Air putih"
+          },
+          {
+            "id": 1,
+            "terpenuhi": true,
+            "kesimpulan": "Es teh"
+          }
+        ]
+      },
+      "rule": {
+        "id": 1,
+        "kondisi": [
+          {
+            "atribut": "cuaca",
+            "operator": "=",
+            "nilai": "panas"
+          }
+        ],
+        "kesimpulan": "Es teh",
+        "kasus_kunci": {
+          "cuaca": "panas",
+          "suhu": 30.0
+        },
+        "true_child": null,
+        "false_child": null
+      }
+    },
+    {
+      "waktu": "2026-11-03T12:24:37.680218+00:00",
+      "aksi": "rule_ditambahkan",
+      "kasus": {
+        "cuaca": "dingin",
+        "suhu": 20.0
+      },
+      "hasil_sebelum": {
+        "kesimpulan": "Air putih",
+        "selesai": true,
+        "atribut_diperlukan": [],
+        "atribut_tidak_diketahui": [],
+        "last_firing_id": 0,
+        "jalur": [
+          {
+            "id": 0,
+            "terpenuhi": true,
+            "kesimpulan": "Air putih"
+          },
+          {
+            "id": 1,
+            "terpenuhi": false,
+            "kesimpulan": "Es teh"
+          }
+        ]
+      },
+      "hasil_sesudah": {
+        "kesimpulan": "Teh hangat",
+        "selesai": true,
+        "atribut_diperlukan": [],
+        "atribut_tidak_diketahui": [],
+        "last_firing_id": 2,
+        "jalur": [
+          {
+            "id": 0,
+            "terpenuhi": true,
+            "kesimpulan": "Air putih"
+          },
+          {
+            "id": 1,
+            "terpenuhi": false,
+            "kesimpulan": "Es teh"
+          },
+          {
+            "id": 2,
+            "terpenuhi": true,
+            "kesimpulan": "Teh hangat"
+          }
+        ]
+      },
+      "rule": {
+        "id": 2,
+        "kondisi": [
+          {
+            "atribut": "cuaca",
+            "operator": "=",
+            "nilai": "dingin"
+          }
+        ],
+        "kesimpulan": "Teh hangat",
+        "kasus_kunci": {
+          "cuaca": "dingin",
+          "suhu": 20.0
+        },
+        "true_child": null,
+        "false_child": null
+      }
+    },
+    {
+      "waktu": "2026-11-03T12:25:59.993046+00:00",
+      "aksi": "rule_ditambahkan",
+      "kasus": {
+        "cuaca": "panas",
+        "suhu": 36.0
+      },
+      "hasil_sebelum": {
+        "kesimpulan": "Es teh",
+        "selesai": true,
+        "atribut_diperlukan": [],
+        "atribut_tidak_diketahui": [],
+        "last_firing_id": 1,
+        "jalur": [
+          {
+            "id": 0,
+            "terpenuhi": true,
+            "kesimpulan": "Air putih"
+          },
+          {
+            "id": 1,
+            "terpenuhi": true,
+            "kesimpulan": "Es teh"
+          }
+        ]
+      },
+      "hasil_sesudah": {
+        "kesimpulan": "Es teh ekstra dingin",
+        "selesai": true,
+        "atribut_diperlukan": [],
+        "atribut_tidak_diketahui": [],
+        "last_firing_id": 3,
+        "jalur": [
+          {
+            "id": 0,
+            "terpenuhi": true,
+            "kesimpulan": "Air putih"
+          },
+          {
+            "id": 1,
+            "terpenuhi": true,
+            "kesimpulan": "Es teh"
+          },
+          {
+            "id": 3,
+            "terpenuhi": true,
+            "kesimpulan": "Es teh ekstra dingin"
+          }
+        ]
+      },
+      "rule": {
+        "id": 3,
+        "kondisi": [
+          {
+            "atribut": "suhu",
+            "operator": ">",
+            "nilai": 33.0
+          }
+        ],
+        "kesimpulan": "Es teh ekstra dingin",
+        "kasus_kunci": {
+          "cuaca": "panas",
+          "suhu": 36.0
+        },
+        "true_child": null,
+        "false_child": null
+      }
+    },
+    {
+      "waktu": "2026-11-03T12:26:16.745303+00:00",
+      "aksi": "disetujui",
+      "kasus": {
+        "cuaca": "panas",
+        "suhu": 28.0
+      },
+      "hasil": {
+        "kesimpulan": "Es teh",
+        "selesai": true,
+        "atribut_diperlukan": [],
+        "atribut_tidak_diketahui": [],
+        "last_firing_id": 1,
+        "jalur": [
+          {
+            "id": 0,
+            "terpenuhi": true,
+            "kesimpulan": "Air putih"
+          },
+          {
+            "id": 1,
+            "terpenuhi": true,
+            "kesimpulan": "Es teh"
+          },
+          {
+            "id": 3,
+            "terpenuhi": false,
+            "kesimpulan": "Es teh ekstra dingin"
+          }
+        ]
+      }
+    },
+    {
+      "waktu": "2026-11-03T12:26:40.306644+00:00",
+      "aksi": "rule_ditambahkan",
+      "kasus": {
+        "cuaca": "panas",
+        "suhu": 24.0
+      },
+      "hasil_sebelum": {
+        "kesimpulan": "Es teh",
+        "selesai": true,
+        "atribut_diperlukan": [],
+        "atribut_tidak_diketahui": [],
+        "last_firing_id": 1,
+        "jalur": [
+          {
+            "id": 0,
+            "terpenuhi": true,
+            "kesimpulan": "Air putih"
+          },
+          {
+            "id": 1,
+            "terpenuhi": true,
+            "kesimpulan": "Es teh"
+          },
+          {
+            "id": 3,
+            "terpenuhi": false,
+            "kesimpulan": "Es teh ekstra dingin"
+          }
+        ]
+      },
+      "hasil_sesudah": {
+        "kesimpulan": "Es teh ringan",
+        "selesai": true,
+        "atribut_diperlukan": [],
+        "atribut_tidak_diketahui": [],
+        "last_firing_id": 4,
+        "jalur": [
+          {
+            "id": 0,
+            "terpenuhi": true,
+            "kesimpulan": "Air putih"
+          },
+          {
+            "id": 1,
+            "terpenuhi": true,
+            "kesimpulan": "Es teh"
+          },
+          {
+            "id": 3,
+            "terpenuhi": false,
+            "kesimpulan": "Es teh ekstra dingin"
+          },
+          {
+            "id": 4,
+            "terpenuhi": true,
+            "kesimpulan": "Es teh ringan"
+          }
+        ]
+      },
+      "rule": {
+        "id": 4,
+        "kondisi": [
+          {
+            "atribut": "suhu",
+            "operator": "<",
+            "nilai": 27.0
+          }
+        ],
+        "kesimpulan": "Es teh ringan",
+        "kasus_kunci": {
+          "cuaca": "panas",
+          "suhu": 24.0
+        },
+        "true_child": null,
+        "false_child": null
+      }
+    },
+    {
+      "waktu": "2026-11-03T12:27:04.162245+00:00",
+      "aksi": "rule_ditambahkan",
+      "kasus": {
+        "cuaca": "dingin",
+        "suhu": 8.0
+      },
+      "hasil_sebelum": {
+        "kesimpulan": "Teh hangat",
+        "selesai": true,
+        "atribut_diperlukan": [],
+        "atribut_tidak_diketahui": [],
+        "last_firing_id": 2,
+        "jalur": [
+          {
+            "id": 0,
+            "terpenuhi": true,
+            "kesimpulan": "Air putih"
+          },
+          {
+            "id": 1,
+            "terpenuhi": false,
+            "kesimpulan": "Es teh"
+          },
+          {
+            "id": 2,
+            "terpenuhi": true,
+            "kesimpulan": "Teh hangat"
+          }
+        ]
+      },
+      "hasil_sesudah": {
+        "kesimpulan": "Teh hangat pekat",
+        "selesai": true,
+        "atribut_diperlukan": [],
+        "atribut_tidak_diketahui": [],
+        "last_firing_id": 5,
+        "jalur": [
+          {
+            "id": 0,
+            "terpenuhi": true,
+            "kesimpulan": "Air putih"
+          },
+          {
+            "id": 1,
+            "terpenuhi": false,
+            "kesimpulan": "Es teh"
+          },
+          {
+            "id": 2,
+            "terpenuhi": true,
+            "kesimpulan": "Teh hangat"
+          },
+          {
+            "id": 5,
+            "terpenuhi": true,
+            "kesimpulan": "Teh hangat pekat"
+          }
+        ]
+      },
+      "rule": {
+        "id": 5,
+        "kondisi": [
+          {
+            "atribut": "suhu",
+            "operator": "<",
+            "nilai": 14.0
+          }
+        ],
+        "kesimpulan": "Teh hangat pekat",
+        "kasus_kunci": {
+          "cuaca": "dingin",
+          "suhu": 8.0
+        },
+        "true_child": null,
+        "false_child": null
+      }
+    },
+    {
+      "waktu": "2026-11-03T12:27:42.356889+00:00",
+      "aksi": "atribut_ditambahkan",
+      "atribut": "gula",
+      "definisi": {
+        "tipe": "kategorikal",
+        "nilai": [
+          "tidak",
+          "ya"
+        ]
+      },
+      "nilai_kasus_kunci": []
+    },
+    {
+      "waktu": "2026-11-03T12:28:14.637830+00:00",
+      "aksi": "rule_ditambahkan",
+      "kasus": {
+        "cuaca": "dingin",
+        "suhu": 8.0,
+        "gula": "ya"
+      },
+      "hasil_sebelum": {
+        "kesimpulan": "Teh hangat pekat",
+        "selesai": true,
+        "atribut_diperlukan": [],
+        "atribut_tidak_diketahui": [],
+        "last_firing_id": 5,
+        "jalur": [
+          {
+            "id": 0,
+            "terpenuhi": true,
+            "kesimpulan": "Air putih"
+          },
+          {
+            "id": 1,
+            "terpenuhi": false,
+            "kesimpulan": "Es teh"
+          },
+          {
+            "id": 2,
+            "terpenuhi": true,
+            "kesimpulan": "Teh hangat"
+          },
+          {
+            "id": 5,
+            "terpenuhi": true,
+            "kesimpulan": "Teh hangat pekat"
+          }
+        ]
+      },
+      "hasil_sesudah": {
+        "kesimpulan": "Es teh manis",
+        "selesai": true,
+        "atribut_diperlukan": [],
+        "atribut_tidak_diketahui": [],
+        "last_firing_id": 6,
+        "jalur": [
+          {
+            "id": 0,
+            "terpenuhi": true,
+            "kesimpulan": "Air putih"
+          },
+          {
+            "id": 1,
+            "terpenuhi": false,
+            "kesimpulan": "Es teh"
+          },
+          {
+            "id": 2,
+            "terpenuhi": true,
+            "kesimpulan": "Teh hangat"
+          },
+          {
+            "id": 5,
+            "terpenuhi": true,
+            "kesimpulan": "Teh hangat pekat"
+          },
+          {
+            "id": 6,
+            "terpenuhi": true,
+            "kesimpulan": "Es teh manis"
+          }
+        ]
+      },
+      "rule": {
+        "id": 6,
+        "kondisi": [
+          {
+            "atribut": "gula",
+            "operator": "=",
+            "nilai": "ya"
+          }
+        ],
+        "kesimpulan": "Es teh manis",
+        "kasus_kunci": {
+          "cuaca": "dingin",
+          "suhu": 8.0,
+          "gula": "ya"
+        },
+        "true_child": null,
+        "false_child": null
+      }
+    },
+    {
+      "waktu": "2026-11-03T12:28:35.113356+00:00",
+      "aksi": "disetujui",
+      "kasus": {
+        "cuaca": "panas",
+        "suhu": 30.0,
+        "gula": "tidak"
+      },
+      "hasil": {
+        "kesimpulan": "Es teh",
+        "selesai": true,
+        "atribut_diperlukan": [],
+        "atribut_tidak_diketahui": [],
+        "last_firing_id": 1,
+        "jalur": [
+          {
+            "id": 0,
+            "terpenuhi": true,
+            "kesimpulan": "Air putih"
+          },
+          {
+            "id": 1,
+            "terpenuhi": true,
+            "kesimpulan": "Es teh"
+          },
+          {
+            "id": 3,
+            "terpenuhi": false,
+            "kesimpulan": "Es teh ekstra dingin"
+          },
+          {
+            "id": 4,
+            "terpenuhi": false,
+            "kesimpulan": "Es teh ringan"
+          }
+        ]
+      }
+    },
+    {
+      "waktu": "2026-11-03T12:28:57.865059+00:00",
+      "aksi": "rule_ditambahkan",
+      "kasus": {
+        "cuaca": "panas",
+        "suhu": 32.0,
+        "gula": "ya"
+      },
+      "hasil_sebelum": {
+        "kesimpulan": "Es teh",
+        "selesai": true,
+        "atribut_diperlukan": [],
+        "atribut_tidak_diketahui": [],
+        "last_firing_id": 1,
+        "jalur": [
+          {
+            "id": 0,
+            "terpenuhi": true,
+            "kesimpulan": "Air putih"
+          },
+          {
+            "id": 1,
+            "terpenuhi": true,
+            "kesimpulan": "Es teh"
+          },
+          {
+            "id": 3,
+            "terpenuhi": false,
+            "kesimpulan": "Es teh ekstra dingin"
+          },
+          {
+            "id": 4,
+            "terpenuhi": false,
+            "kesimpulan": "Es teh ringan"
+          }
+        ]
+      },
+      "hasil_sesudah": {
+        "kesimpulan": "Es teh manis dingin",
+        "selesai": true,
+        "atribut_diperlukan": [],
+        "atribut_tidak_diketahui": [],
+        "last_firing_id": 7,
+        "jalur": [
+          {
+            "id": 0,
+            "terpenuhi": true,
+            "kesimpulan": "Air putih"
+          },
+          {
+            "id": 1,
+            "terpenuhi": true,
+            "kesimpulan": "Es teh"
+          },
+          {
+            "id": 3,
+            "terpenuhi": false,
+            "kesimpulan": "Es teh ekstra dingin"
+          },
+          {
+            "id": 4,
+            "terpenuhi": false,
+            "kesimpulan": "Es teh ringan"
+          },
+          {
+            "id": 7,
+            "terpenuhi": true,
+            "kesimpulan": "Es teh manis dingin"
+          }
+        ]
+      },
+      "rule": {
+        "id": 7,
+        "kondisi": [
+          {
+            "atribut": "suhu",
+            "operator": ">",
+            "nilai": 31.0
+          }
+        ],
+        "kesimpulan": "Es teh manis dingin",
+        "kasus_kunci": {
+          "cuaca": "panas",
+          "suhu": 32.0,
+          "gula": "ya"
+        },
+        "true_child": null,
+        "false_child": null
+      }
+    },
+    {
+      "waktu": "2026-11-03T12:29:13.572165+00:00",
+      "aksi": "disetujui",
+      "kasus": {
+        "cuaca": "panas",
+        "suhu": 40.0,
+        "gula": "ya"
+      },
+      "hasil": {
+        "kesimpulan": "Es teh ekstra dingin",
+        "selesai": true,
+        "atribut_diperlukan": [],
+        "atribut_tidak_diketahui": [],
+        "last_firing_id": 3,
+        "jalur": [
+          {
+            "id": 0,
+            "terpenuhi": true,
+            "kesimpulan": "Air putih"
+          },
+          {
+            "id": 1,
+            "terpenuhi": true,
+            "kesimpulan": "Es teh"
+          },
+          {
+            "id": 3,
+            "terpenuhi": true,
+            "kesimpulan": "Es teh ekstra dingin"
+          }
+        ]
+      }
+    }
+  ]
+}
